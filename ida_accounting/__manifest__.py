@@ -2,10 +2,12 @@
     'name': 'IDA Accounting',
     'version': '19.0.1.0.0',
     'category': 'Accounting',
-    'summary': 'Accounting Customization — Analytic Distribution Amount Column',
+    'summary': 'Accounting Customization — Analytic Distribution Enhancements',
     'description': """
-        Extends the Analytic Distribution popup on Journal Items to display
-        a computed Amount column alongside each distribution line's percentage.
+        - Extends the Analytic Distribution popup on Journal Items to display
+          a computed Amount column alongside each distribution line's percentage.
+        - Automatically propagates the analytic distribution set on an invoice's
+          AR/AP line to the corresponding payment journal entry line upon reconciliation.
     """,
     'author': 'Joshua Aclan',
     'depends': [
