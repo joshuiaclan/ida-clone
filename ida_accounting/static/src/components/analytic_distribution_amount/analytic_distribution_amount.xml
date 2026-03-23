@@ -1,24 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates>
     <!--
-        Extends the core AnalyticDistribution popup template to add an
-        "Amount" column that shows the monetary value for each distribution line.
+        Extends analytic.AnalyticDistributionPopup (the popup table template
+        called via t-call from AnalyticDistribution) to add an "Amount" column.
 
-        Odoo 19 template name: analytic.AnalyticDistribution
-        Target elements use the class o_analytic_percentage (header <th> and
-        data <td>) which bracket the percentage column in the popup table.
+        XPath strategy:
+          - Header : insert <th> BEFORE the delete-column <th class="deleteColumn w-20px"/>
+          - Data rows: insert <td> BEFORE the delete-button <td class="w-20px"/>
+
+        The amount is computed by idaGetAnalyticAmount() patched onto
+        AnalyticDistribution, which owns the t-call — so 'this' is available
+        throughout the popup template including inside Record slot content.
+        Percentage is read from data.record.data.percentage (the virtual record
+        created per distribution line inside the Record component).
     -->
-    <t t-inherit="analytic.AnalyticDistribution" t-inherit-mode="extension">
+    <t t-inherit="analytic.AnalyticDistributionPopup" t-inherit-mode="extension">
 
-        <!-- 1. Add "Amount" header after the "Percentage" header -->
-        <xpath expr="//th[hasclass('o_analytic_percentage')]" position="after">
-            <th class="o_ida_analytic_amount text-end pe-3">Amount</th>
+        <!-- 1. Amount column header — before the delete placeholder header -->
+        <xpath expr="//th[hasclass('deleteColumn')]" position="before">
+            <th class="o_ida_analytic_amount numeric_column_width text-end">Amount</th>
         </xpath>
 
-        <!-- 2. Add the computed amount cell after the percentage cell in each row -->
-        <xpath expr="//td[hasclass('o_analytic_percentage')]" position="after">
-            <td class="o_ida_analytic_amount text-end pe-3">
-                <t t-esc="idaGetAnalyticAmount(widgetLine.percentage)"/>
+        <!-- 2. Amount cell per row — before the delete icon cell -->
+        <xpath expr="//td[hasclass('w-20px')]" position="before">
+            <td class="o_ida_analytic_amount numeric_column_width text-end">
+                <t t-esc="idaGetAnalyticAmount(data.record.data.percentage)"/>
             </td>
         </xpath>
 
