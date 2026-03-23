@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_form_ida_sales" model="ir.ui.view">
+        <field name="name">sale.order.form.ida.sales</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Insert Project Classification section above the customer field -->
+            <xpath expr="//field[@name='partner_id']" position="before">
+                <group string="Project Classification" colspan="2">
+                    <field name="project_type" widget="radio" required="1"/>
+                    <field
+                        name="base_project_number"
+                        invisible="project_type != 'new_project'"
+                        readonly="True"
+                    />
+                    <field
+                        name="base_project_id"
+                        invisible="project_type != 'existing_project'"
+                        required="project_type == 'existing_project'"
+                    />
+                </group>
+                <separator/>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>
