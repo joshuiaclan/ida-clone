@@ -9,7 +9,7 @@
         - Existing Project: requires selection of an existing base project
         - Additional Services: marks the order as additional services for a client
     """,
-    'author': 'IDA',
+    'author': 'Joshua Aclan',
     'depends': [
         'sale_management',
         'project',

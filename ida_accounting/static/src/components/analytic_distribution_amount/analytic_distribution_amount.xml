@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+    <!--
+        Extends the core AnalyticDistribution popup template to add an
+        "Amount" column that shows the monetary value for each distribution line.
+
+        Odoo 19 template name: analytic.AnalyticDistribution
+        Target elements use the class o_analytic_percentage (header <th> and
+        data <td>) which bracket the percentage column in the popup table.
+    -->
+    <t t-inherit="analytic.AnalyticDistribution" t-inherit-mode="extension">
+
+        <!-- 1. Add "Amount" header after the "Percentage" header -->
+        <xpath expr="//th[hasclass('o_analytic_percentage')]" position="after">
+            <th class="o_ida_analytic_amount text-end pe-3">Amount</th>
+        </xpath>
+
+        <!-- 2. Add the computed amount cell after the percentage cell in each row -->
+        <xpath expr="//td[hasclass('o_analytic_percentage')]" position="after">
+            <td class="o_ida_analytic_amount text-end pe-3">
+                <t t-esc="idaGetAnalyticAmount(widgetLine.percentage)"/>
+            </td>
+        </xpath>
+
+    </t>
+</templates>
