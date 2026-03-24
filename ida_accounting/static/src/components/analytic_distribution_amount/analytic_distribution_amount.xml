@@ -4,45 +4,33 @@
         Extends analytic.AnalyticDistributionPopup to add a two-way editable
         "Amount" column.
 
-        Odoo 19 popup template structure (confirmed from source):
+        OWL 2 rule: t-on-* expressions that are NOT a plain method name must use
+        "this." so OWL binds the call to the component instance.
 
-          <thead>
-            <tr>
-              <th t-foreach="allPlans" .../>          ← plan columns
-              <th class="numeric_column_width">Percentage</th>
-              <th t-if="valueColumnEnabled" .../>     ← optional built-in amount
-              <th class="deleteColumn w-20px"/>       ← ← we insert BEFORE this
-            </tr>
-          </thead>
-          <tbody>
-            <tr t-foreach="state.formattedData" t-as="line" ...>
-              <Record t-props="recordProps(line)" t-slot-scope="data">
-                ...plan tds...
-                <td class="numeric_column_width">   ← percentage Field
-                <td t-if="valueColumnEnabled" ...>
-                <td class="w-20px">                 ← ← we insert BEFORE this
-              </Record>
-            </tr>
-          </tbody>
+          ✗  t-on-change="(ev) => idaOnAmountChange(ev, data)"
+               → idaOnAmountChange is resolved as a free variable; `this` is undefined
+          ✓  t-on-change="(ev) => this.idaOnAmountChange(ev, data)"
+               → called as a method; `this` is the AnalyticDistribution component
 
-        idaAmountValue(pct)     → numeric value for the input (pct is 0–1)
-        idaOnAmountChange(ev, data) → updates data.record.percentage (0–1) on blur
+        Amount ↔ Percentage conversions (Odoo 19 stores pct as 0–1 internally):
+          display amount  = baseAmount × percentage
+          new percentage  = newAmount  / baseAmount   (clamped to [0, 1])
     -->
     <t t-inherit="analytic.AnalyticDistributionPopup" t-inherit-mode="extension">
 
-        <!-- 1. Amount column header -->
+        <!-- 1. Amount column header (inserted before the delete-icon column) -->
         <xpath expr="//th[hasclass('deleteColumn')]" position="before">
             <th class="o_ida_analytic_amount text-end pe-2">Amount</th>
         </xpath>
 
-        <!-- 2. Amount cell per row -->
+        <!-- 2. Amount input cell per distribution row -->
         <xpath expr="//td[hasclass('w-20px')]" position="before">
             <td class="o_ida_analytic_amount text-end">
                 <input
                     type="number"
                     class="o_ida_analytic_amount_input"
-                    t-att-value="idaAmountValue(data.record.data.percentage)"
-                    t-on-change="(ev) => idaOnAmountChange(ev, data)"
+                    t-att-value="this.idaAmountValue(data.record.data.percentage)"
+                    t-on-change="(ev) => this.idaOnAmountChange(ev, data)"
                     step="0.01"
                     min="0"
                 />
