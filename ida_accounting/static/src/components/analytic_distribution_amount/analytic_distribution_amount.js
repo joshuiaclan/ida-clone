@@ -9,51 +9,51 @@ import { patch } from "@web/core/utils/patch";
  *
  * ─── Odoo 19 percentage convention ────────────────────────────────────────
  *   The virtual Record stores `percentage` in the 0–1 range (not 0–100).
- *   Therefore:
- *     display amount  = baseAmount × percentage          (no extra ÷ 100)
- *     new percentage  = newAmount  / baseAmount          (result in 0–1)
+ *     display amount  = baseAmount × percentage
+ *     new percentage  = newAmount  / baseAmount   (clamped to [0, 1])
+ *
+ * ─── Why Math.round instead of toFixed ────────────────────────────────────
+ *   IEEE 754 float multiplication can produce values like:
+ *     3000 × 0.333333 = 999.99900000000003
+ *   `.toFixed(2)` on that gives "999.99" instead of "1000.00" because the
+ *   float is technically below the rounding threshold.
+ *   `Math.round(raw × 100) / 100` avoids this by operating on the integer
+ *   domain where float error is negligible for any realistic base amount.
  *
  * ─── OWL 2 event-handler rule ─────────────────────────────────────────────
- *   Always call patched methods with "this." inside t-on-* expressions so
- *   OWL binds the call to the component instance:
- *     ✗  t-on-change="(ev) => idaOnAmountChange(ev, data)"   → this = undefined
- *     ✓  t-on-change="(ev) => this.idaOnAmountChange(ev, data)"
- *
- * ─── Base-amount resolution (first non-zero wins) ─────────────────────────
- *   1. debit + credit    → account.move.line (Journal Items tab)
- *   2. price_subtotal    → invoice / SO lines
+ *   Always use  this.method(args)  in t-on-* expressions; bare method names
+ *   are treated as free variables and lose the component's `this` binding.
  */
 patch(AnalyticDistribution.prototype, {
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     /**
-     * Returns the monetary base for this record line.
-     * Reads from props.record (the parent account.move.line / sale.order.line).
-     * Returns 0 when unavailable so callers can bail out gracefully.
-     *
+     * Returns the monetary base for this record line (debit+credit or price_subtotal).
      * @returns {number}
      */
     _idaBaseAmount() {
         const d = this.props?.record?.data;
         if (!d) return 0;
         const fromJournal = (parseFloat(d.debit) || 0) + (parseFloat(d.credit) || 0);
-        if (fromJournal) return fromJournal;
-        return Math.abs(parseFloat(d.price_subtotal) || 0);
+        return fromJournal || Math.abs(parseFloat(d.price_subtotal) || 0);
     },
 
     /**
-     * Computes the display amount for a distribution line.
-     * Called from t-att-value in the template (OWL evaluates t-att-* with
-     * the component as `this`, so this method always has the right context).
+     * Returns the stable 2-decimal display amount for a distribution line.
      *
-     * @param {number|string} percentage  0–1  (Odoo 19 internal representation)
-     * @returns {number}
+     * Uses Math.round(raw × 100) / 100 to avoid toFixed floating-point drift:
+     *   - Input:  percentage 0–1, e.g. 0.333333
+     *   - Output: e.g. "1000.00"  (string, always 2 decimal places)
+     *
+     * @param {number|string} percentage  0–1
+     * @returns {string}
      */
     idaAmountValue(percentage) {
         const pct = parseFloat(percentage) || 0;
         const base = this._idaBaseAmount();
-        return parseFloat((base * pct).toFixed(2));
+        const stable = Math.round(base * pct * 100) / 100;
+        return stable.toFixed(2);
     },
 
     // ── Event handler ────────────────────────────────────────────────────────
@@ -61,41 +61,41 @@ patch(AnalyticDistribution.prototype, {
     /**
      * Handles the "change" event on the Amount input.
      *
-     * Calculates the new percentage (0–1) from the entered amount and writes it
-     * to the virtual distribution record via data.record.update().  Odoo's own
-     * onRecordChanged → lineChanged flow then persists the full analytic JSON.
+     * Rounds the entered amount to 2 decimal places, derives the new percentage
+     * (0–1, full float precision — no artificial decimal cap), and writes it to
+     * the virtual Record.  On re-render idaAmountValue() will recover the exact
+     * 2-decimal amount thanks to Math.round.
      *
-     * IMPORTANT: must be called as  this.idaOnAmountChange(ev, data)  inside the
-     * OWL template so that `this` is bound to the AnalyticDistribution instance.
+     * Must be invoked as  this.idaOnAmountChange(ev, data)  in OWL templates.
      *
-     * @param {Event}  ev    The DOM change event from the amount <input>.
-     * @param {object} data  Slot-scope from the Record component in the popup.
+     * @param {Event}  ev
+     * @param {object} data  slot-scope from the popup's Record component
      */
     async idaOnAmountChange(ev, data) {
         const base = this._idaBaseAmount();
         if (!base) {
-            // No base amount available – restore the displayed value and bail.
             ev.target.value = this.idaAmountValue(data?.record?.data?.percentage ?? 0);
             return;
         }
 
-        const newAmount = parseFloat(ev.target.value);
-        if (isNaN(newAmount) || newAmount < 0) {
-            // Invalid input – reset to the current computed amount.
+        const input = parseFloat(ev.target.value);
+        if (isNaN(input) || input < 0) {
             ev.target.value = this.idaAmountValue(data?.record?.data?.percentage ?? 0);
             return;
         }
 
-        // Clamp to [0, 1] and round to sufficient precision for Odoo.
-        const rawPct = newAmount / base;
-        const clampedPct = Math.min(1, Math.max(0, rawPct));
-        const rounded = parseFloat(clampedPct.toFixed(6));
+        // Clamp to monetary precision (2 decimal places) before deriving pct
+        const newAmount = Math.round(input * 100) / 100;
+
+        // Keep full float precision for pct — Math.round in idaAmountValue
+        // guarantees a stable round-trip without any artificial cap here.
+        const clamped = Math.min(1, Math.max(0, newAmount / base));
 
         if (!data?.record?.update) {
             console.warn("ida_accounting: data.record.update not available");
             return;
         }
 
-        await data.record.update({ percentage: rounded });
+        await data.record.update({ percentage: clamped });
     },
 });
