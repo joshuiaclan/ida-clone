@@ -1,30 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates>
     <!--
-        Extends analytic.AnalyticDistributionPopup (the popup table template
-        called via t-call from AnalyticDistribution) to add an "Amount" column.
+        Extends analytic.AnalyticDistributionPopup to add a two-way editable
+        "Amount" column next to the Percentage column.
 
-        XPath strategy:
-          - Header : insert <th> BEFORE the delete-column <th class="deleteColumn w-20px"/>
-          - Data rows: insert <td> BEFORE the delete-button <td class="w-20px"/>
+        · Header  — inserted before the delete-column <th class="deleteColumn">
+        · Data row — inserted before the delete-button <td class="w-20px">
 
-        The amount is computed by idaGetAnalyticAmount() patched onto
-        AnalyticDistribution, which owns the t-call — so 'this' is available
-        throughout the popup template including inside Record slot content.
-        Percentage is read from data.record.data.percentage (the virtual record
-        created per distribution line inside the Record component).
+        idaAmountValue()      → formats amount for the input's value attribute
+        idaOnAmountInput()    → recomputes percentage when amount is edited
+        Both are patched onto the AnalyticDistribution instance (the `this`
+        context for a t-call), so they are reachable from inside the popup.
     -->
     <t t-inherit="analytic.AnalyticDistributionPopup" t-inherit-mode="extension">
 
         <!-- 1. Amount column header — before the delete placeholder header -->
         <xpath expr="//th[hasclass('deleteColumn')]" position="before">
-            <th class="o_ida_analytic_amount numeric_column_width text-end">Amount</th>
+            <th class="o_ida_analytic_amount text-end pe-2">Amount</th>
         </xpath>
 
         <!-- 2. Amount cell per row — before the delete icon cell -->
         <xpath expr="//td[hasclass('w-20px')]" position="before">
-            <td class="o_ida_analytic_amount numeric_column_width text-end">
-                <t t-esc="idaGetAnalyticAmount(data.record.data.percentage)"/>
+            <td class="o_ida_analytic_amount text-end">
+                <input
+                    type="number"
+                    class="o_ida_analytic_amount_input"
+                    t-att-value="idaAmountValue(data.record.data.percentage)"
+                    t-on-change="(ev) => idaOnAmountInput(ev, data)"
+                    step="0.01"
+                    min="0"
+                />
             </td>
         </xpath>
 

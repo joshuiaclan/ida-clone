@@ -1,5 +1,23 @@
 .o_ida_analytic_amount {
-    min-width: 90px;
+    min-width: 110px;
     white-space: nowrap;
     font-variant-numeric: tabular-nums;
+
+    .o_ida_analytic_amount_input {
+        width: 100%;
+        min-width: 90px;
+        text-align: right;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        padding: 1px 4px;
+        background: transparent;
+        font-variant-numeric: tabular-nums;
+
+        &:hover,
+        &:focus {
+            border-color: #adb5bd;
+            background: #fff;
+            outline: none;
+        }
+    }
 }
