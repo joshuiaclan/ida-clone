@@ -2,31 +2,47 @@
 <templates>
     <!--
         Extends analytic.AnalyticDistributionPopup to add a two-way editable
-        "Amount" column next to the Percentage column.
+        "Amount" column.
 
-        · Header  — inserted before the delete-column <th class="deleteColumn">
-        · Data row — inserted before the delete-button <td class="w-20px">
+        Odoo 19 popup template structure (confirmed from source):
 
-        idaAmountValue()      → formats amount for the input's value attribute
-        idaOnAmountInput()    → recomputes percentage when amount is edited
-        Both are patched onto the AnalyticDistribution instance (the `this`
-        context for a t-call), so they are reachable from inside the popup.
+          <thead>
+            <tr>
+              <th t-foreach="allPlans" .../>          ← plan columns
+              <th class="numeric_column_width">Percentage</th>
+              <th t-if="valueColumnEnabled" .../>     ← optional built-in amount
+              <th class="deleteColumn w-20px"/>       ← ← we insert BEFORE this
+            </tr>
+          </thead>
+          <tbody>
+            <tr t-foreach="state.formattedData" t-as="line" ...>
+              <Record t-props="recordProps(line)" t-slot-scope="data">
+                ...plan tds...
+                <td class="numeric_column_width">   ← percentage Field
+                <td t-if="valueColumnEnabled" ...>
+                <td class="w-20px">                 ← ← we insert BEFORE this
+              </Record>
+            </tr>
+          </tbody>
+
+        idaAmountValue(pct)     → numeric value for the input (pct is 0–1)
+        idaOnAmountChange(ev, data) → updates data.record.percentage (0–1) on blur
     -->
     <t t-inherit="analytic.AnalyticDistributionPopup" t-inherit-mode="extension">
 
-        <!-- 1. Amount column header — before the delete placeholder header -->
+        <!-- 1. Amount column header -->
         <xpath expr="//th[hasclass('deleteColumn')]" position="before">
             <th class="o_ida_analytic_amount text-end pe-2">Amount</th>
         </xpath>
 
-        <!-- 2. Amount cell per row — before the delete icon cell -->
+        <!-- 2. Amount cell per row -->
         <xpath expr="//td[hasclass('w-20px')]" position="before">
             <td class="o_ida_analytic_amount text-end">
                 <input
                     type="number"
                     class="o_ida_analytic_amount_input"
                     t-att-value="idaAmountValue(data.record.data.percentage)"
-                    t-on-change="(ev) => idaOnAmountInput(ev, data)"
+                    t-on-change="(ev) => idaOnAmountChange(ev, data)"
                     step="0.01"
                     min="0"
                 />

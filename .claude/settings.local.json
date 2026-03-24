@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "WebFetch(domain:raw.githubusercontent.com)",
-      "Bash(curl -s \"https://raw.githubusercontent.com/odoo/odoo/18.0/addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml\")"
+      "Bash(curl -s \"https://raw.githubusercontent.com/odoo/odoo/18.0/addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml\")",
+      "WebFetch(domain:github.com)",
+      "Bash(curl -s https://raw.githubusercontent.com/odoo/odoo/19.0/addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml)",
+      "Bash(curl -s https://raw.githubusercontent.com/odoo/odoo/19.0/addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js)"
     ]
   }
 }

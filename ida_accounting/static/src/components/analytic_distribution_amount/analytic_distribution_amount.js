@@ -4,22 +4,24 @@ import { AnalyticDistribution } from "@analytic/components/analytic_distribution
 import { patch } from "@web/core/utils/patch";
 
 /**
- * Patches AnalyticDistribution to support a two-way editable "Amount" column
- * inside the analytic distribution popup.
+ * Patches AnalyticDistribution to add a two-way editable "Amount" column
+ * in the analytic distribution popup.
  *
- * Percentage storage in Odoo 19 popup virtual records is 0–100 (e.g. 50 = 50 %).
- * Amount  = baseAmount × (percentage / 100)
- * Reverse = percentage = (amount / baseAmount) × 100
+ * IMPORTANT — Odoo 19 stores percentage in 0–1 range internally
+ * (see jsonToData: `percentage: percentage / 100`).
+ * Therefore:
+ *   amount  = baseAmount × percentage          (NO extra ÷100)
+ *   reverse = newPct    = newAmount / baseAmount  (result is 0–1)
  *
  * Base amount resolution (first non-zero wins):
- *   1. debit + credit     → account.move.line on the Journal Items tab
- *   2. price_subtotal     → invoice / SO lines
+ *   1. debit + credit    → account.move.line (Journal Items tab)
+ *   2. price_subtotal    → invoice / SO lines
  */
 patch(AnalyticDistribution.prototype, {
 
-    // ── helpers ──────────────────────────────────────────────────────────────
+    // ─── helpers ─────────────────────────────────────────────────────────────
 
-    /** Returns the monetary base for this journal/invoice line. */
+    /** Returns the monetary base amount for this record line. */
     _idaBaseAmount() {
         const d = this.props.record?.data;
         if (!d) return 0;
@@ -28,43 +30,41 @@ patch(AnalyticDistribution.prototype, {
     },
 
     /**
-     * Computes the distribution amount from a percentage.
-     * @param {number|string} percentage  0–100
+     * Returns the numeric amount for a distribution line.
+     * @param {number} percentage  0–1  (Odoo 19 internal representation)
      * @returns {number}
      */
-    _idaAmountFromPct(percentage) {
-        const pct = parseFloat(percentage) || 0;
-        return this._idaBaseAmount() * (pct / 100);
-    },
-
-    /**
-     * Formats the amount for display inside the input.
-     * @param {number|string} percentage  0–100
-     * @returns {string}  e.g. "1250.00"
-     */
     idaAmountValue(percentage) {
-        return this._idaAmountFromPct(percentage).toFixed(2);
+        const pct = parseFloat(percentage) || 0;
+        const amount = this._idaBaseAmount() * pct;
+        return parseFloat(amount.toFixed(2));
     },
 
-    // ── event handlers ───────────────────────────────────────────────────────
+    // ─── event handler ───────────────────────────────────────────────────────
 
     /**
-     * Called when the user edits the Amount input.
-     * Converts the entered amount back to a percentage and writes it to the
-     * virtual distribution record so Odoo reacts normally.
+     * Called when the user edits the Amount input (on blur / Enter).
+     * Calculates the new percentage (0–1) and writes it to the virtual
+     * distribution record; Odoo's own onRecordChanged → lineChanged flow
+     * then saves the full analytic distribution.
      *
-     * @param {InputEvent} ev
-     * @param {object}     data  — template context `data` from the popup loop
+     * @param {Event}  ev
+     * @param {object} data  slot-scope from the Record component inside the popup
      */
-    async idaOnAmountInput(ev, data) {
+    async idaOnAmountChange(ev, data) {
         const base = this._idaBaseAmount();
         if (!base) return;
 
         const newAmount = parseFloat(ev.target.value);
-        if (isNaN(newAmount)) return;
+        if (isNaN(newAmount) || newAmount < 0) return;
 
-        // Clamp: percentage must stay within 0–100 range
-        const newPct = Math.min(100, Math.max(0, (newAmount / base) * 100));
-        await data.record.update({ percentage: parseFloat(newPct.toFixed(4)) });
+        // Result must stay in 0–1 (clamp to valid range)
+        const newPct = Math.min(1, Math.max(0, newAmount / base));
+
+        // Round to the same precision Odoo uses internally (+2 over display digits)
+        const digits = this.decimalPrecision?.digits?.[1] ?? 2;
+        const rounded = parseFloat(newPct.toFixed(digits + 2));
+
+        await data.record.update({ percentage: rounded });
     },
 });
