@@ -97,5 +97,12 @@ patch(AnalyticDistribution.prototype, {
         }
 
         await data.record.update({ percentage: clamped });
+
+        // After data.record.update() OWL re-renders and may patch the input's
+        // value via t-att-value, overwriting what the user typed with a
+        // floating-point re-calculation that can differ by a tiny amount.
+        // Setting ev.target.value here (after the await) wins over that patch
+        // and locks the displayed value to exactly the normalised amount.
+        ev.target.value = newAmount.toFixed(2);
     },
 });
