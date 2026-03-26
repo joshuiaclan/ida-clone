@@ -48,13 +48,6 @@ class SaleOrder(models.Model):
         self.ensure_one()
         return self.env['ir.sequence'].next_by_code('ida.sales.project.number') or '/'
 
-    @api.constrains('project_type', 'base_project_id')
-    def _check_existing_project_required(self):
-        for order in self:
-            if order.project_type == 'existing_project' and not order.base_project_id:
-                raise ValidationError(
-                    _('A Base Project must be selected when Project Type is "Existing Project".')
-                )
 
     @api.onchange('project_type')
     def _onchange_project_type(self):
