@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Adds the Base Project Number and Project Location fields to the
+        project form view so they are visible (read-only) once the
+        number is generated from the sale order.
+    -->
+    <record id="view_project_project_form_ida" model="ir.ui.view">
+        <field name="name">project.project.form.ida.project</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.edit_project"/>
+        <field name="arch" type="xml">
+
+            <!-- Place the IDA fields in the Settings tab / Description area -->
+            <xpath expr="//field[@name='description']" position="before">
+                <group string="Project Reference" col="2"
+                       invisible="not base_project_number">
+                    <field name="base_project_number" readonly="True"/>
+                    <field name="project_location_id"  readonly="True"/>
+                </group>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

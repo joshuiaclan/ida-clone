@@ -35,10 +35,18 @@ class SaleOrder(models.Model):
         res = super().action_confirm()
         for order in self:
             if order.project_type == 'new_project' and not order.base_project_number:
-                order.base_project_number = (
-                    self.env['ir.sequence'].next_by_code('ida.sales.project.number') or '/'
-                )
+                order.base_project_number = order._generate_base_project_number()
         return res
+
+    def _generate_base_project_number(self):
+        """Return the base project number for this order.
+
+        Override in downstream modules (e.g. ida_project) to produce a
+        fully-structured number.  The default implementation uses the simple
+        ida.sales.project.number sequence defined in this module.
+        """
+        self.ensure_one()
+        return self.env['ir.sequence'].next_by_code('ida.sales.project.number') or '/'
 
     @api.constrains('project_type', 'base_project_id')
     def _check_existing_project_required(self):

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Extends the Project Classification group that ida_sales added to the
+        sale order form view with the two new fields required to build the
+        full structured project number.
+
+        Both fields are:
+          • visible   only when project_type == 'new_project'
+          • required  only when project_type == 'new_project'
+          • cleared automatically by the _onchange_project_type_ida_project hook
+    -->
+    <record id="view_sale_order_form_ida_project" model="ir.ui.view">
+        <field name="name">sale.order.form.ida.project</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!-- Insert Project Location and Department after base_project_number -->
+            <xpath expr="//field[@name='base_project_number']" position="after">
+
+                <field
+                    name="project_location_id"
+                    invisible="project_type != 'new_project'"
+                    required="project_type == 'new_project'"
+                    options="{'no_create': True}"
+                />
+
+                <field
+                    name="department_id"
+                    invisible="project_type != 'new_project'"
+                    required="project_type == 'new_project'"
+                />
+
+            </xpath>
+        </field>
+    </record>
+</odoo>

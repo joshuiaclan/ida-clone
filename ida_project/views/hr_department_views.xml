@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Add the Department Code field to the standard hr.department form view
+        so users can set a short code that will appear in project numbers.
+    -->
+    <record id="view_hr_department_form_ida" model="ir.ui.view">
+        <field name="name">hr.department.form.ida.project</field>
+        <field name="model">hr.department</field>
+        <field name="inherit_id" ref="hr.view_department_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="code"
+                       placeholder="e.g. IT, FIN, OPS"
+                       help="Short code used as a component of the Base Project Number. "
+                            "If left blank the first 3 letters of the department name are used."/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
