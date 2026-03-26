@@ -4,21 +4,29 @@
         Extends analytic.AnalyticDistributionPopup to add a two-way editable
         "Amount" column.
 
-        OWL 2 rule: t-on-* expressions that are NOT a plain method name must use
-        "this." so OWL binds the call to the component instance.
+        ── Why we pass `line` (not `data`) to idaOnAmountChange ─────────────
+        Odoo 19's `lineChanged()` rounds `line.percentage` to
+        `analytic_precision + 2` decimal places (default = 4 dp in 0–1 range).
+        That gives a minimum step of `base × 0.0001`, which for base ≥ 100 is
+        larger than one cent — amounts like 333.33 become 333.30 after save.
 
-          ✗  t-on-change="(ev) => idaOnAmountChange(ev, data)"
-               → idaOnAmountChange is resolved as a free variable; `this` is undefined
-          ✓  t-on-change="(ev) => this.idaOnAmountChange(ev, data)"
-               → called as a method; `this` is the AnalyticDistribution component
+        By accepting the reactive `line` object (from state.formattedData) and
+        writing `line.percentage` directly we bypass lineChanged entirely and
+        preserve full float64 precision through the save/reload cycle.
 
-        Amount ↔ Percentage conversions (Odoo 19 stores pct as 0–1 internally):
-          display amount  = baseAmount × percentage
-          new percentage  = newAmount  / baseAmount   (clamped to [0, 1])
+        ── Why type="text" (not type="number") ──────────────────────────────
+        `<input type="number">` silently strips trailing zeros on assignment:
+          setAttribute('value', '500.00') → browser stores 500 → shows "500"
+        Switching to type="text" + inputmode="decimal" preserves "500.00"
+        while keeping the numeric keyboard on mobile.
+
+        ── OWL 2 binding rule ───────────────────────────────────────────────
+        Always use  this.method(args)  inside t-on-* arrow functions so the
+        call is bound to the component instance (`this` is not undefined).
     -->
     <t t-inherit="analytic.AnalyticDistributionPopup" t-inherit-mode="extension">
 
-        <!-- 1. Amount column header (inserted before the delete-icon column) -->
+        <!-- 1. Amount column header (before the delete-icon column) -->
         <xpath expr="//th[hasclass('deleteColumn')]" position="before">
             <th class="o_ida_analytic_amount text-end pe-2">Amount</th>
         </xpath>
@@ -27,12 +35,11 @@
         <xpath expr="//td[hasclass('w-20px')]" position="before">
             <td class="o_ida_analytic_amount text-end">
                 <input
-                    type="number"
-                    class="o_ida_analytic_amount_input"
-                    t-att-value="this.idaAmountValue(data.record.data.percentage)"
-                    t-on-change="(ev) => this.idaOnAmountChange(ev, data)"
-                    step="0.01"
-                    min="0"
+                    type="text"
+                    inputmode="decimal"
+                    class="o_ida_analytic_amount_input text-end"
+                    t-att-value="this.idaAmountValue(line.percentage)"
+                    t-on-change="(ev) => this.idaOnAmountChange(ev, line)"
                 />
             </td>
         </xpath>

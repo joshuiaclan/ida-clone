@@ -7,29 +7,42 @@ import { patch } from "@web/core/utils/patch";
  * Patches AnalyticDistribution to add a two-way editable "Amount" column
  * in the analytic distribution popup.
  *
- * ─── Odoo 19 percentage convention ────────────────────────────────────────
- *   The virtual Record stores `percentage` in the 0–1 range (not 0–100).
- *     display amount  = baseAmount × percentage
- *     new percentage  = newAmount  / baseAmount   (clamped to [0, 1])
+ * ── Why we bypass lineChanged ──────────────────────────────────────────────
+ *   Odoo 19's lineChanged() rounds the percentage to
+ *   `analytic_precision + 2` decimal places (default analytic_precision = 2,
+ *   so 4 decimal places in 0–1 range).
  *
- * ─── Why Math.round instead of toFixed ────────────────────────────────────
- *   IEEE 754 float multiplication can produce values like:
- *     3000 × 0.333333 = 999.99900000000003
- *   `.toFixed(2)` on that gives "999.99" instead of "1000.00" because the
- *   float is technically below the rounding threshold.
- *   `Math.round(raw × 100) / 100` avoids this by operating on the integer
- *   domain where float error is negligible for any realistic base amount.
+ *   Rounding precision in 0–1 range = 0.0001
+ *   → minimum amount step                = base × 0.0001
+ *   → for base = 1 000                   = 0.10   (cents are lost!)
+ *   → for base = 10 000                  = 1.00
  *
- * ─── OWL 2 event-handler rule ─────────────────────────────────────────────
- *   Always use  this.method(args)  in t-on-* expressions; bare method names
- *   are treated as free variables and lose the component's `this` binding.
+ *   By writing `line.percentage` directly on the reactive state object we
+ *   keep full float64 precision.  Calling this.save() then serialises via
+ *   dataToJson (×100) and the server stores e.g. "33.333" in the JSON field.
+ *   On reload jsonToData divides by 100, recovering 0.33333 exactly.
+ *
+ * ── Why type="text" on the input ──────────────────────────────────────────
+ *   <input type="number"> strips trailing zeros:
+ *     setAttribute('value', '500.00')  →  browser displays "500"  ✗
+ *   <input type="text" inputmode="decimal">  preserves "500.00"   ✓
+ *
+ * ── Why Math.round(x × 100) / 100 instead of toFixed ─────────────────────
+ *   IEEE 754 multiplication can yield e.g. 3000 × 0.333333 = 999.9990000…03.
+ *   .toFixed(2) can round that DOWN to "999.99"; Math.round operates in the
+ *   integer domain where the error is negligible and always rounds correctly.
+ *
+ * ── OWL 2 binding rule ────────────────────────────────────────────────────
+ *   In t-on-* arrow-function expressions bare names are free variables —
+ *   use  this.method(args)  to call it as a bound component method.
  */
 patch(AnalyticDistribution.prototype, {
 
     // ── Helpers ──────────────────────────────────────────────────────────────
 
     /**
-     * Returns the monetary base for this record line (debit+credit or price_subtotal).
+     * Returns the monetary base for this record line.
+     * Priority: debit + credit (journal items) → |price_subtotal| (invoice lines).
      * @returns {number}
      */
     _idaBaseAmount() {
@@ -40,14 +53,17 @@ patch(AnalyticDistribution.prototype, {
     },
 
     /**
-     * Returns the stable 2-decimal display amount for a distribution line.
+     * Converts a 0–1 percentage to a stable 2-decimal display string.
      *
-     * Uses Math.round(raw × 100) / 100 to avoid toFixed floating-point drift:
-     *   - Input:  percentage 0–1, e.g. 0.333333
-     *   - Output: e.g. "1000.00"  (string, always 2 decimal places)
+     * Uses Math.round(raw × 100) / 100 to avoid toFixed floating-point drift.
+     * Returns a string so <input type="text"> shows exactly two decimal places
+     * (e.g. "500.00", not "500").
      *
-     * @param {number|string} percentage  0–1
-     * @returns {string}
+     * Called from t-att-value — OWL evaluates t-att-* with the component as
+     * `this`, so the method always has the correct context.
+     *
+     * @param {number|string} percentage  0–1 (Odoo 19 internal representation)
+     * @returns {string}  e.g. "333.33"
      */
     idaAmountValue(percentage) {
         const pct = parseFloat(percentage) || 0;
@@ -61,48 +77,51 @@ patch(AnalyticDistribution.prototype, {
     /**
      * Handles the "change" event on the Amount input.
      *
-     * Rounds the entered amount to 2 decimal places, derives the new percentage
-     * (0–1, full float precision — no artificial decimal cap), and writes it to
-     * the virtual Record.  On re-render idaAmountValue() will recover the exact
-     * 2-decimal amount thanks to Math.round.
+     * Writes the new percentage directly to the reactive `line` object from
+     * state.formattedData, bypassing lineChanged() and its precision rounding.
+     * Then calls this.save() which runs dataToJson() (×100) and updates the
+     * parent record — full float64 precision is preserved through the cycle.
      *
-     * Must be invoked as  this.idaOnAmountChange(ev, data)  in OWL templates.
+     * Must be called as  this.idaOnAmountChange(ev, line)  in OWL templates.
      *
-     * @param {Event}  ev
-     * @param {object} data  slot-scope from the popup's Record component
+     * @param {Event}  ev    DOM change event from the Amount <input>.
+     * @param {object} line  Reactive entry from this.state.formattedData.
      */
-    async idaOnAmountChange(ev, data) {
+    async idaOnAmountChange(ev, line) {
         const base = this._idaBaseAmount();
         if (!base) {
-            ev.target.value = this.idaAmountValue(data?.record?.data?.percentage ?? 0);
+            ev.target.value = this.idaAmountValue(line?.percentage ?? 0);
             return;
         }
 
         const input = parseFloat(ev.target.value);
         if (isNaN(input) || input < 0) {
-            ev.target.value = this.idaAmountValue(data?.record?.data?.percentage ?? 0);
+            ev.target.value = this.idaAmountValue(line?.percentage ?? 0);
             return;
         }
 
-        // Clamp to monetary precision (2 decimal places) before deriving pct
+        // Normalise to monetary precision (2 dp) before deriving pct
         const newAmount = Math.round(input * 100) / 100;
 
-        // Keep full float precision for pct — Math.round in idaAmountValue
-        // guarantees a stable round-trip without any artificial cap here.
+        // Full float precision — no artificial cap.
+        // Math.round in idaAmountValue guarantees a stable round-trip.
         const clamped = Math.min(1, Math.max(0, newAmount / base));
 
-        if (!data?.record?.update) {
-            console.warn("ida_accounting: data.record.update not available");
-            return;
+        // ── Key fix ────────────────────────────────────────────────────────
+        // Write directly to the reactive state object, bypassing lineChanged()
+        // which would round to only analytic_precision+2 decimal places (4 by
+        // default) — too coarse for 2-dp amounts when base > 100.
+        line.percentage = clamped;
+
+        // Persist: dataToJson() serialises (clamped × 100) → the server stores
+        // e.g. "33.333"; jsonToData on reload divides by 100 → 0.33333 exactly.
+        if (typeof this.save === "function") {
+            await this.save();
         }
 
-        await data.record.update({ percentage: clamped });
-
-        // After data.record.update() OWL re-renders and may patch the input's
-        // value via t-att-value, overwriting what the user typed with a
-        // floating-point re-calculation that can differ by a tiny amount.
-        // Setting ev.target.value here (after the await) wins over that patch
-        // and locks the displayed value to exactly the normalised amount.
+        // Lock the displayed value after any OWL re-render triggered by save().
+        // Without this, t-att-value could overwrite the input with a
+        // slightly different float string.
         ev.target.value = newAmount.toFixed(2);
     },
 });
