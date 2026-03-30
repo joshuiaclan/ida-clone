@@ -21,17 +21,27 @@ class SaleOrder(models.Model):
     def action_confirm(self):
         """After the number is generated (by ida_sales calling
         _generate_base_project_number), write it — plus the location — to the
-        linked project's *name* field so no extra field is required on
-        project.project.
+        name of every project that was created from this sale order:
+
+          • order.project_id          – main project (sale_project)
+          • order.order_line.project_id – per-line projects created by
+                                          service-tracking lines (sale_project)
         """
         res = super().action_confirm()
         for order in self:
-            if order.project_type == 'new_project' and order.base_project_number:
-                if order.project_id:
-                    order.project_id.write({
-                        'name': order.base_project_number,
-                        'project_location_id': order.project_location_id.id,
-                    })
+            if not (order.project_type == 'new_project' and order.base_project_number):
+                continue
+
+            projects = (
+                order.project_id
+                | order.order_line.mapped('project_id')
+            ).filtered('id')
+
+            if projects:
+                projects.write({
+                    'name': order.base_project_number,
+                    'project_location_id': order.project_location_id.id,
+                })
         return res
 
     # ── Project number generation (overrides ida_sales hook) ─────────────────
