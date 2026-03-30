@@ -12,10 +12,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='categ_id']" position="after">
                 <field name="department_short_code"
-                       placeholder="e.g. IT, FIN, OPS"
-                       help="Short code used as the department component of the "
-                            "Base Project Number when this product appears on a "
-                            'New Project sale order.'/>
+                       placeholder="e.g. IT, FIN, OPS"/>
             </xpath>
         </field>
     </record>
