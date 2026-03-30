@@ -19,15 +19,22 @@ class SaleOrder(models.Model):
     # ── Confirmation ──────────────────────────────────────────────────────────
 
     def action_confirm(self):
-        """After the number is generated (by ida_sales calling
-        _generate_base_project_number), write it — plus the location — to the
-        name of every project that was created from this sale order:
+        """Pre-generate the project number so it is available when
+        sale_project's _timesheet_create_project() runs inside super(), then
+        apply the number and location to every project linked to the order.
 
           • order.project_id          – main project (sale_project)
           • order.order_line.project_id – per-line projects created by
                                           service-tracking lines (sale_project)
         """
+        # Pre-generate numbers BEFORE super() so _timesheet_create_project()
+        # can read order_id.base_project_number via prepare_values override.
+        for order in self:
+            if order.project_type == 'new_project' and not order.base_project_number:
+                order.base_project_number = order._generate_base_project_number()
+
         res = super().action_confirm()
+
         for order in self:
             if not (order.project_type == 'new_project' and order.base_project_number):
                 continue
