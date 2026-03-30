@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Adds the Department Short Code field to the product form view
+        (General Information tab) so it can be set per product and used
+        as a component of the Base Project Number.
+    -->
+    <record id="view_product_template_form_ida_project" model="ir.ui.view">
+        <field name="name">product.template.form.ida.project</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='categ_id']" position="after">
+                <field name="department_short_code"
+                       placeholder="e.g. IT, FIN, OPS"
+                       help="Short code used as the department component of the "
+                            "Base Project Number when this product appears on a "
+                            'New Project sale order.'/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

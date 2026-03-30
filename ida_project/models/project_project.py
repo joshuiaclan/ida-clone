@@ -2,16 +2,13 @@ from odoo import models, fields
 
 
 class ProjectProject(models.Model):
-    """Stores the structured project number generated from the linked sale order."""
-    _inherit = 'project.project'
+    """Stores the Project Location propagated from the originating sale order.
 
-    base_project_number = fields.Char(
-        string='Base Project Number',
-        readonly=True,
-        copy=False,
-        tracking=True,
-        help='Structured project number assigned when the originating Sales Order is confirmed.',
-    )
+    The Base Project Number itself is written to the project's standard
+    `name` field when the sale order is confirmed, so no separate field
+    is needed here.
+    """
+    _inherit = 'project.project'
 
     project_location_id = fields.Many2one(
         comodel_name='ida.project.location',

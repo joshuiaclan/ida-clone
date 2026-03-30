@@ -5,37 +5,31 @@ from odoo.exceptions import UserError
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    # ── New fields ────────────────────────────────────────────────────────────
-
     project_location_id = fields.Many2one(
         comodel_name='ida.project.location',
         string='Project Location',
         tracking=True,
-        help='Physical or logical location of the project. '
-             'Used as a component of the Base Project Number.',
+        help=(
+            'Physical or logical location of the project. '
+            'Used as a component of the Base Project Number and '
+            'copied to the linked project on confirmation.'
+        ),
     )
 
-    department_id = fields.Many2one(
-        comodel_name='hr.department',
-        string='Department',
-        tracking=True,
-        help='Responsible department. '
-             'Its code (or first 3 letters of the name) forms part of the '
-             'Base Project Number.',
-    )
-
-    # ── Confirmation hook ─────────────────────────────────────────────────────
+    # ── Confirmation ──────────────────────────────────────────────────────────
 
     def action_confirm(self):
-        """After confirmation, propagate the generated number to the project."""
+        """After the number is generated (by ida_sales calling
+        _generate_base_project_number), write it — plus the location — to the
+        linked project's *name* field so no extra field is required on
+        project.project.
+        """
         res = super().action_confirm()
         for order in self:
             if order.project_type == 'new_project' and order.base_project_number:
-                # sale_project links the SO to a project via project_id.
-                # Write the structured number (and location) to that project.
                 if order.project_id:
                     order.project_id.write({
-                        'base_project_number': order.base_project_number,
+                        'name': order.base_project_number,
                         'project_location_id': order.project_location_id.id,
                     })
         return res
@@ -52,47 +46,50 @@ class SaleOrder(models.Model):
 
         Components
         ──────────
-        YEAR      – 4-digit year of today's date (confirmation date).
-        DEPT_CODE – department.code, or first 3 chars of department.name
-                    (upper-cased) when no explicit code is set.
+        YEAR      – 4-digit confirmation year.
+        DEPT_CODE – `department_short_code` of the first sale order line
+                    whose product has that field populated (upper-cased).
         SEQ       – 3-digit number from the yearly-reset ir.sequence
-                    "ida.project.number".  Resets to 001 on 1 Jan each year.
-        LOC_SEQ   – "final suffix": 2-digit sequential count of New-Project
-                    sale orders at the same Project Location confirmed in
-                    the same calendar year.  Computed in the backend at the
-                    moment the sequence is generated.
+                    "ida.project.number" (resets to 001 on 1 Jan each year).
+        LOC_SEQ   – 2-digit count of other confirmed New-Project orders at
+                    the same Project Location in the same calendar year + 1.
+                    This is the "final suffix added in the backend at the
+                    moment the sequence is generated."
 
-        Raises UserError when Project Location or Department is not set,
-        because both are required to build the number.
+        Raises UserError if Project Location is not set or no sale order
+        line carries a product with a Department Short Code.
         """
         self.ensure_one()
 
         if not self.project_location_id:
             raise UserError(_(
-                'Project Location is required for "New Project" orders '
-                'before the order can be confirmed.\n'
-                'Please set the Project Location on the order form.'
+                'Project Location is required for "New Project" orders.\n'
+                'Please set it on the order before confirming.'
             ))
-        if not self.department_id:
+
+        # Resolve department code from the first product line that has one
+        dept_code = ''
+        for line in self.order_line:
+            code = (line.product_id.department_short_code or '').strip().upper()
+            if code:
+                dept_code = code
+                break
+
+        if not dept_code:
             raise UserError(_(
-                'Department is required for "New Project" orders '
-                'before the order can be confirmed.\n'
-                'Please set the Department on the order form.'
+                'At least one sale order line must have a product with a '
+                '"Department Short Code" set before this order can be confirmed.'
             ))
 
         today = fields.Date.context_today(self)
         year = today.year
 
-        # ── 1. Yearly sequential number (Odoo sequence, auto-resets each year)
+        # ── 1. Yearly sequential number (auto-resets via ir.sequence date_range)
         seq = self.env['ir.sequence'].next_by_code('ida.project.number') or '001'
 
-        # ── 2. Department code
-        dept = self.department_id
-        dept_code = (dept.code or dept.name[:3]).strip().upper()
-
-        # ── 3. Location sequence — "final suffix added in the backend"
-        #    Count confirmed New-Project orders at the same location
-        #    within the current calendar year (excluding this order).
+        # ── 2. Location sequence — the "final suffix added in the backend"
+        #    Count other confirmed New-Project orders at the same location
+        #    within the same calendar year.
         year_start = today.replace(month=1, day=1)
         year_end = today.replace(year=year + 1, month=1, day=1)
 
@@ -109,11 +106,10 @@ class SaleOrder(models.Model):
         # ── Combine: YEAR-DEPT_CODE-SEQ-LOC_SEQ
         return f"{year}-{dept_code}-{seq}-{loc_seq}"
 
-    # ── Onchange helpers ──────────────────────────────────────────────────────
+    # ── Onchange ──────────────────────────────────────────────────────────────
 
     @api.onchange('project_type')
     def _onchange_project_type_ida_project(self):
-        """Clear location and department when the order is not a new project."""
+        """Clear location when the order is no longer a new project."""
         if self.project_type != 'new_project':
             self.project_location_id = False
-            self.department_id = False
