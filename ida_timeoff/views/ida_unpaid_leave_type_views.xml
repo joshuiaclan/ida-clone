@@ -26,7 +26,7 @@
         name="Unpaid Time Off Types"
         parent="hr_holidays.menu_hr_holidays_configuration"
         action="action_ida_unpaid_leave_type"
-        sequence="20"
+        sequence="1"
     />
 
 </odoo>
