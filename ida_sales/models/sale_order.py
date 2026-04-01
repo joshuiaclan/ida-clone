@@ -35,13 +35,6 @@ class SaleOrder(models.Model):
         res = super().action_confirm()
         for order in self:
             if order.deal_type == 'new_project' and not order.base_project_number:
-<<<<<<< Updated upstream
-                order.base_project_number = (
-                    self.env['ir.sequence'].next_by_code('ida.sales.project.number') or '/'
-                )
-        return res
-
-=======
                 order.base_project_number = order._generate_base_project_number()
         return res
 
@@ -63,7 +56,6 @@ class SaleOrder(models.Model):
                     _('A Base Project must be selected when Project Type is "Existing Project".')
                 )
 
->>>>>>> Stashed changes
     @api.onchange('deal_type')
     def _onchange_deal_type(self):
         if self.deal_type != 'existing_project':
