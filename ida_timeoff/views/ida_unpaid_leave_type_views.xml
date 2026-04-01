@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- List view — editable, single Name column -->
+    <record id="view_ida_unpaid_leave_type_list" model="ir.ui.view">
+        <field name="name">ida.unpaid.leave.type.list</field>
+        <field name="model">ida.unpaid.leave.type</field>
+        <field name="arch" type="xml">
+            <list editable="bottom">
+                <field name="name"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- Action -->
+    <record id="action_ida_unpaid_leave_type" model="ir.actions.act_window">
+        <field name="name">Unpaid Time Off Types</field>
+        <field name="res_model">ida.unpaid.leave.type</field>
+        <field name="view_mode">list</field>
+        <field name="view_id" ref="view_ida_unpaid_leave_type_list"/>
+    </record>
+
+    <!-- Menu under Time Off > Configuration -->
+    <menuitem
+        id="menu_ida_unpaid_leave_type"
+        name="Unpaid Time Off Types"
+        parent="hr_holidays.menu_hr_holidays_configuration"
+        action="action_ida_unpaid_leave_type"
+        sequence="20"
+    />
+
+</odoo>

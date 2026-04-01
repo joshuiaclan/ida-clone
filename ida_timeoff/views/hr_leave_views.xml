@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Add Unpaid Time Off Type field to the time off request form -->
+    <record id="view_hr_leave_form_ida" model="ir.ui.view">
+        <field name="name">hr.leave.form.ida</field>
+        <field name="model">hr.leave</field>
+        <field name="inherit_id" ref="hr_holidays.hr_leave_view_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='holiday_status_id']" position="after">
+                <field name="leave_is_unpaid" invisible="True"/>
+                <field
+                    name="unpaid_leave_type_id"
+                    invisible="not leave_is_unpaid"
+                    required="leave_is_unpaid"
+                />
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_ida_unpaid_leave_type_user,ida.unpaid.leave.type user,model_ida_unpaid_leave_type,hr_holidays.group_hr_holidays_user,1,0,0,0
+access_ida_unpaid_leave_type_manager,ida.unpaid.leave.type manager,model_ida_unpaid_leave_type,hr_holidays.group_hr_holidays_manager,1,1,1,1
