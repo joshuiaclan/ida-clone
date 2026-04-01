@@ -11,5 +11,7 @@ class SaleOrderLine(models.Model):
         values = super()._timesheet_create_project_prepare_values()
         order = self.order_id
         if order.deal_type == 'new_project' and order.base_project_number:
-            values['name'] = order.base_project_number
+            product_name = self.product_id.name or ''
+            suffix = f" {product_name}" if product_name else ''
+            values['name'] = f"{order.base_project_number}{suffix}"
         return values

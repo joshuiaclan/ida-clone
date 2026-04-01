@@ -26,15 +26,29 @@ class SaleOrder(models.Model):
 
         # After super(), all projects are created — assign the full number with
         # a two-digit sub-sequence to each project linked to this order.
+        # Line-generated projects also get the product name appended.
         for order in self:
             if not (order.deal_type == 'new_project' and order.base_project_number):
                 continue
 
-            projects = (
-                order.project_id | order.order_line.mapped('project_id')
-            ).filtered('id')
+            idx = 1
+            seen = set()
 
-            for idx, project in enumerate(projects, start=1):
-                project.name = f"{order.base_project_number}-{idx:02d}"
+            # Main order project — no product suffix
+            if order.project_id and order.project_id.id not in seen:
+                order.project_id.name = f"{order.base_project_number}-{idx:02d}"
+                seen.add(order.project_id.id)
+                idx += 1
+
+            # Per-line projects — append product name
+            for line in order.order_line:
+                project = line.project_id
+                if not project or project.id in seen:
+                    continue
+                product_name = line.product_id.name or ''
+                suffix = f" {product_name}" if product_name else ''
+                project.name = f"{order.base_project_number}-{idx:02d}{suffix}"
+                seen.add(project.id)
+                idx += 1
 
         return res
