@@ -8,18 +8,16 @@
 
             <!-- Insert Project Classification section above the customer field -->
             <xpath expr="//field[@name='payment_term_id']" position="after">
-                <group colspan="2">
-                    <field name="deal_type"/>
-                    <field
-                        name="base_project_number"
-                        invisible="deal_type != 'new_project'"
-                    />
-                    <field
-                        name="base_project_id"
-                        invisible="deal_type != 'existing_project'"
-                        required="deal_type == 'existing_project'"
-                    />
-                </group>
+                <field name="deal_type" colspan="2" required="1"/>
+                <field
+                    name="base_project_number" colspan="2"
+                    invisible="deal_type != 'new_project'"
+                />
+                <field
+                    name="base_project_id" colspan="2"
+                    invisible="deal_type != 'existing_project'"
+                    required="deal_type == 'existing_project'"
+                />
             </xpath>
 
         </field>

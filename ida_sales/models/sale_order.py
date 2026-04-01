@@ -5,13 +5,13 @@ from odoo.exceptions import ValidationError
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    project_type = fields.Selection(
+    deal_type = fields.Selection(
         selection=[
             ('new_project', 'New Project'),
             ('existing_project', 'Existing Project'),
             ('additional_services', 'Additional Services'),
         ],
-        string='Project Type',
+        string='Deal Type',
         tracking=True,
     )
 
@@ -34,22 +34,13 @@ class SaleOrder(models.Model):
     def action_confirm(self):
         res = super().action_confirm()
         for order in self:
-            if order.project_type == 'new_project' and not order.base_project_number:
-                order.base_project_number = order._generate_base_project_number()
+            if order.deal_type == 'new_project' and not order.base_project_number:
+                order.base_project_number = (
+                    self.env['ir.sequence'].next_by_code('ida.sales.project.number') or '/'
+                )
         return res
 
-    def _generate_base_project_number(self):
-        """Return the base project number for this order.
-
-        Override in downstream modules (e.g. ida_project) to produce a
-        fully-structured number.  The default implementation uses the simple
-        ida.sales.project.number sequence defined in this module.
-        """
-        self.ensure_one()
-        return self.env['ir.sequence'].next_by_code('ida.sales.project.number') or '/'
-
-
-    @api.onchange('project_type')
-    def _onchange_project_type(self):
-        if self.project_type != 'existing_project':
+    @api.onchange('deal_type')
+    def _onchange_deal_type(self):
+        if self.deal_type != 'existing_project':
             self.base_project_id = False
