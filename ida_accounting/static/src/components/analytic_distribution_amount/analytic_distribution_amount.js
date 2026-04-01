@@ -33,71 +33,55 @@ patch(AnalyticDistribution.prototype, {
      *   1. analytic_distribution_amounts backend field (persists across sessions)
      *   2. Module-level session cache (survives popup close/open within the tab)
      *   3. Computed from percentage × base (always available, may drift)
+     *
+     * For 1 and 2 the stored amount is only used when it is still consistent
+     * with the current line.percentage — i.e. the user has not manually changed
+     * the percentage since the amount was last set.  A mismatch means the
+     * percentage was edited independently, so we fall through to the computed
+     * value so the amount updates in sync with the new percentage.
+     *
+     * Tolerance of 0.00005 (0.005 %) covers server-side rounding of the stored
+     * percentage to two decimal places without accidentally accepting a genuine
+     * manual percentage change.
      */
     idaAmountDisplay(line) {
+        const base = this._idaBaseAmount();
+        const pct = parseFloat(line.percentage) || 0;
+        const computed = (Math.round(base * pct * 100) / 100).toFixed(2);
+
+        if (!base) return computed;
+
+        const isConsistent = (storedAmount) => {
+            const amount = parseFloat(storedAmount);
+            if (isNaN(amount)) return false;
+            return Math.abs(amount / base - pct) < 0.00005;
+        };
+
         // 1. Backend field
         const saved = this.props?.record?.data?.analytic_distribution_amounts;
         if (saved) {
             const key = String(line.id);
             if (key in saved) {
-                return parseFloat(saved[key]).toFixed(2);
+                return isConsistent(saved[key])
+                    ? parseFloat(saved[key]).toFixed(2)
+                    : computed;
             }
         }
 
         // 2. Session cache
         const cacheKey = this._idaCacheKey(line);
         if (_idaAmountCache.has(cacheKey)) {
-            return _idaAmountCache.get(cacheKey);
+            const cached = _idaAmountCache.get(cacheKey);
+            if (isConsistent(cached)) return cached;
+            // Stale — percentage changed manually, discard
+            _idaAmountCache.delete(cacheKey);
         }
 
         // 3. Computed fallback
-        const pct = parseFloat(line.percentage) || 0;
-        const base = this._idaBaseAmount();
-        return (Math.round(base * pct * 100) / 100).toFixed(2);
+        return computed;
     },
 
-    // ── Percentage → Amount sync ──────────────────────────────────────────────
-
-    /**
-     * Called by Odoo when the percentage input changes.
-     * After the original handler rounds and saves the new percentage, we
-     * recompute the amount, update the DOM amount input immediately, then
-     * persist the new amount to the backend field and session cache.
-     */
-    async lineChanged(line, key) {
-        await super.lineChanged(line, key);
-
-        if (key !== "percentage") return;
-
-        // Discard stale cached amount so idaAmountDisplay recomputes.
-        _idaAmountCache.delete(this._idaCacheKey(line));
-
-        const base = this._idaBaseAmount();
-        const newAmount = Math.round(base * (line.percentage || 0) * 100) / 100;
-        const amountStr = newAmount.toFixed(2);
-
-        // Update the DOM input immediately (before next OWL render).
-        const amountInput = document.querySelector(
-            `.o_ida_analytic_amount_input[data-line-id="${CSS.escape(String(line.id))}"]`
-        );
-        if (amountInput) amountInput.value = amountStr;
-
-        // Refresh session cache with the newly computed amount.
-        _idaAmountCache.set(this._idaCacheKey(line), amountStr);
-
-        // Persist to the backend field so the amount survives a page reload.
-        const record = this.props?.record;
-        if (record?.update) {
-            const currentAmounts = Object.assign(
-                {},
-                record.data?.analytic_distribution_amounts || {}
-            );
-            currentAmounts[String(line.id)] = newAmount;
-            await record.update({ analytic_distribution_amounts: currentAmounts });
-        }
-    },
-
-    // ── Amount → Percentage sync ──────────────────────────────────────────────
+    // ── Event handler ────────────────────────────────────────────────────────
 
     async idaOnAmountChange(ev, line) {
         const base = this._idaBaseAmount();
