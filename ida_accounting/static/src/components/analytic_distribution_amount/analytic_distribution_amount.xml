@@ -38,7 +38,7 @@
                     type="text"
                     inputmode="decimal"
                     class="o_ida_analytic_amount_input text-end"
-                    t-att-value="this.idaAmountValue(line.percentage)"
+                    t-att-value="this.idaAmountDisplay(line)"
                     t-on-change="(ev) => this.idaOnAmountChange(ev, line)"
                 />
             </td>
