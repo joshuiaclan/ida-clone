@@ -15,8 +15,8 @@
                 />
                 <field
                     name="base_project_id" colspan="2"
-                    invisible="deal_type != 'existing_project'"
-                    required="deal_type == 'existing_project'"
+                    invisible="deal_type == 'new_project' or not deal_type"
+                    required="deal_type != 'new_project' and deal_type"
                 />
             </xpath>
 
