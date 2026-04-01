@@ -2,7 +2,7 @@ from odoo import models, fields
 
 
 class HrHolidayStatus(models.Model):
-    _inherit = 'hr.holiday.status'
+    _inherit = 'hr.leave.type'
 
     is_unpaid = fields.Boolean(
         string='Is Unpaid Time Off',
