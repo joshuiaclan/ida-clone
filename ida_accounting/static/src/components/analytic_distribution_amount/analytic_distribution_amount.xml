@@ -14,6 +14,7 @@
                     type="text"
                     inputmode="decimal"
                     class="o_ida_analytic_amount_input text-end"
+                    t-att-data-line-id="line.id"
                     t-att-value="this.idaAmountDisplay(line)"
                     t-on-change="(ev) => this.idaOnAmountChange(ev, line)"
                 />

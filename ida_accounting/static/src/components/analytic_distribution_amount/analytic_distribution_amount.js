@@ -56,7 +56,48 @@ patch(AnalyticDistribution.prototype, {
         return (Math.round(base * pct * 100) / 100).toFixed(2);
     },
 
-    // ── Event handler ────────────────────────────────────────────────────────
+    // ── Percentage → Amount sync ──────────────────────────────────────────────
+
+    /**
+     * Called by Odoo when the percentage input changes.
+     * After the original handler rounds and saves the new percentage, we
+     * recompute the amount, update the DOM amount input immediately, then
+     * persist the new amount to the backend field and session cache.
+     */
+    async lineChanged(line, key) {
+        await super.lineChanged(line, key);
+
+        if (key !== "percentage") return;
+
+        // Discard stale cached amount so idaAmountDisplay recomputes.
+        _idaAmountCache.delete(this._idaCacheKey(line));
+
+        const base = this._idaBaseAmount();
+        const newAmount = Math.round(base * (line.percentage || 0) * 100) / 100;
+        const amountStr = newAmount.toFixed(2);
+
+        // Update the DOM input immediately (before next OWL render).
+        const amountInput = document.querySelector(
+            `.o_ida_analytic_amount_input[data-line-id="${CSS.escape(String(line.id))}"]`
+        );
+        if (amountInput) amountInput.value = amountStr;
+
+        // Refresh session cache with the newly computed amount.
+        _idaAmountCache.set(this._idaCacheKey(line), amountStr);
+
+        // Persist to the backend field so the amount survives a page reload.
+        const record = this.props?.record;
+        if (record?.update) {
+            const currentAmounts = Object.assign(
+                {},
+                record.data?.analytic_distribution_amounts || {}
+            );
+            currentAmounts[String(line.id)] = newAmount;
+            await record.update({ analytic_distribution_amounts: currentAmounts });
+        }
+    },
+
+    // ── Amount → Percentage sync ──────────────────────────────────────────────
 
     async idaOnAmountChange(ev, line) {
         const base = this._idaBaseAmount();
