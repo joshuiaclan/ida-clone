@@ -34,8 +34,15 @@ class SaleOrder(models.Model):
             idx = 1
             seen = set()
 
-            # Main order project — no product suffix
-            if order.project_id and order.project_id.id not in seen:
+            # Collect project IDs that belong to order lines
+            line_project_ids = {
+                line.project_id.id
+                for line in order.order_line
+                if line.project_id
+            }
+
+            # Main order project — only if it is not also a line project
+            if order.project_id and order.project_id.id not in line_project_ids:
                 order.project_id.name = f"{order.base_project_number}-{idx:02d}"
                 seen.add(order.project_id.id)
                 idx += 1
