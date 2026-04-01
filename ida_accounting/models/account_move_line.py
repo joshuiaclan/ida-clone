@@ -1,8 +1,17 @@
-from odoo import models
+from odoo import models, fields
 
 
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
+
+    analytic_distribution_amounts = fields.Json(
+        string='Analytic Distribution Amounts',
+        copy=True,
+        help='Stores the user-entered absolute amount for each analytic account '
+             'in the distribution, keyed by analytic account ID. '
+             'Set from the frontend when the user edits the Amount column in the '
+             'Analytic Distribution popup.',
+    )
 
     def reconcile(self):
         res = super().reconcile()

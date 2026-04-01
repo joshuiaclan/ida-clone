@@ -1,29 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <templates>
-    <!--
-        Extends analytic.AnalyticDistributionPopup to add a two-way editable
-        "Amount" column.
-
-        ── Why we pass `line` (not `data`) to idaOnAmountChange ─────────────
-        Odoo 19's `lineChanged()` rounds `line.percentage` to
-        `analytic_precision + 2` decimal places (default = 4 dp in 0–1 range).
-        That gives a minimum step of `base × 0.0001`, which for base ≥ 100 is
-        larger than one cent — amounts like 333.33 become 333.30 after save.
-
-        By accepting the reactive `line` object (from state.formattedData) and
-        writing `line.percentage` directly we bypass lineChanged entirely and
-        preserve full float64 precision through the save/reload cycle.
-
-        ── Why type="text" (not type="number") ──────────────────────────────
-        `<input type="number">` silently strips trailing zeros on assignment:
-          setAttribute('value', '500.00') → browser stores 500 → shows "500"
-        Switching to type="text" + inputmode="decimal" preserves "500.00"
-        while keeping the numeric keyboard on mobile.
-
-        ── OWL 2 binding rule ───────────────────────────────────────────────
-        Always use  this.method(args)  inside t-on-* arrow functions so the
-        call is bound to the component instance (`this` is not undefined).
-    -->
     <t t-inherit="analytic.AnalyticDistributionPopup" t-inherit-mode="extension">
 
         <!-- 1. Amount column header (before the delete-icon column) -->

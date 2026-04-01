@@ -14,6 +14,9 @@
         'account',
         'analytic',
     ],
+    'data': [
+        'views/account_move_views.xml',
+    ],
     'assets': {
         'web.assets_backend': [
             'ida_accounting/static/src/components/analytic_distribution_amount/analytic_distribution_amount.js',
