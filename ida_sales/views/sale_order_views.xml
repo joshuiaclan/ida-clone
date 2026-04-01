@@ -7,6 +7,7 @@
         <field name="arch" type="xml">
 
             <!-- Insert Project Classification section above the customer field -->
+<<<<<<< Updated upstream
             <xpath expr="//field[@name='payment_term_id']" position="after">
                 <field name="deal_type" colspan="2" required="1"/>
                 <field
@@ -18,6 +19,23 @@
                     invisible="deal_type != 'existing_project'"
                     required="deal_type == 'existing_project'"
                 />
+=======
+            <xpath expr="//field[@name='partner_id']" position="before">
+                <group string="Project Classification" colspan="2">
+                    <field name="deal_type" widget="radio" required="1"/>
+                    <field
+                        name="base_project_number"
+                        invisible="deal_type != 'new_project'"
+                        readonly="True"
+                    />
+                    <field
+                        name="base_project_id"
+                        invisible="deal_type != 'existing_project'"
+                        required="deal_type == 'existing_project'"
+                    />
+                </group>
+                <separator/>
+>>>>>>> Stashed changes
             </xpath>
 
         </field>

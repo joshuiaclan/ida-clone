@@ -35,11 +35,35 @@ class SaleOrder(models.Model):
         res = super().action_confirm()
         for order in self:
             if order.deal_type == 'new_project' and not order.base_project_number:
+<<<<<<< Updated upstream
                 order.base_project_number = (
                     self.env['ir.sequence'].next_by_code('ida.sales.project.number') or '/'
                 )
         return res
 
+=======
+                order.base_project_number = order._generate_base_project_number()
+        return res
+
+    def _generate_base_project_number(self):
+        """Return the base project number for this order.
+
+        Override in downstream modules (e.g. ida_project) to produce a
+        fully-structured number.  The default implementation uses the simple
+        ida.sales.project.number sequence defined in this module.
+        """
+        self.ensure_one()
+        return self.env['ir.sequence'].next_by_code('ida.sales.project.number') or '/'
+
+    @api.constrains('deal_type', 'base_project_id')
+    def _check_existing_project_required(self):
+        for order in self:
+            if order.deal_type == 'existing_project' and not order.base_project_id:
+                raise ValidationError(
+                    _('A Base Project must be selected when Project Type is "Existing Project".')
+                )
+
+>>>>>>> Stashed changes
     @api.onchange('deal_type')
     def _onchange_deal_type(self):
         if self.deal_type != 'existing_project':

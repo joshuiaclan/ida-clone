@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Generates the middle segment of the project number (e.g. "001").
+        The year prefix and sub-project suffix are added in Python.
+        use_date_range resets the counter to 1 each calendar year.
+    -->
+    <record id="seq_ida_project_main" model="ir.sequence">
+        <field name="name">IDA Project Number</field>
+        <field name="code">ida.project.main</field>
+        <field name="padding">3</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+        <field name="use_date_range">True</field>
+    </record>
+</odoo>
