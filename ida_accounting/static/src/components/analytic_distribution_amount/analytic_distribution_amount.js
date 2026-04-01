@@ -74,6 +74,7 @@ patch(AnalyticDistribution.prototype, {
         const newAmount = Math.round(input * 100) / 100;
         const clamped = Math.min(1, Math.max(0, newAmount / base));
         const amountStr = newAmount.toFixed(2);
+        const pctDisplay = (Math.round(clamped * 10000) / 100).toFixed(2);
 
         // Write to session cache immediately so idaAmountDisplay returns the
         // correct value even before the backend field is confirmed saved.
@@ -81,6 +82,23 @@ patch(AnalyticDistribution.prototype, {
 
         // Update the percentage in reactive state (keeps % column in sync).
         line.percentage = clamped;
+
+        // Directly update the percentage input in the same row so it reflects
+        // the new value immediately, regardless of OWL's render cycle.
+        // We find every input in the row that is NOT our amount input and
+        // pick the one that currently holds a number that looks like a percentage
+        // (between 0 and 100), as that is the percentage column.
+        const row = ev.target.closest("tr");
+        if (row) {
+            const siblings = Array.from(row.querySelectorAll("input")).filter(
+                (el) => el !== ev.target
+            );
+            const pctInput = siblings.find((el) => {
+                const v = parseFloat(el.value);
+                return !isNaN(v) && v >= 0 && v <= 100;
+            });
+            if (pctInput) pctInput.value = pctDisplay;
+        }
 
         // ── ORDERING IS CRITICAL ────────────────────────────────────────────
         // 1. Save the percentage FIRST.
