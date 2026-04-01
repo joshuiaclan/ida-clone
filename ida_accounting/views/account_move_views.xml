@@ -1,19 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!--
-        Inject analytic_distribution_amounts as an invisible field into the
-        journal items list so that it is included in the record's loaded data.
-        Without this the field would not be present in record.data and the
-        frontend Amount column could not read or write it.
+        Inject analytic_distribution_amounts as an invisible field into every
+        list that can show the Analytic Distribution popup on account.move:
+
+          • invoice_line_ids  — the "Invoice Lines" tab
+          • line_ids          — the "Journal Items" tab (visible in the screenshot)
+
+        Without these xpaths the field is absent from record.data and the
+        frontend Amount column cannot read or write it.
     -->
     <record id="view_move_form_ida_analytic_amounts" model="ir.ui.view">
         <field name="name">account.move.form.ida.analytic.amounts</field>
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
+
+            <!-- Invoice Lines tab -->
             <xpath expr="//field[@name='invoice_line_ids']//field[@name='analytic_distribution']" position="after">
                 <field name="analytic_distribution_amounts" column_invisible="True"/>
             </xpath>
+
+            <!-- Journal Items tab -->
+            <xpath expr="//field[@name='line_ids']//field[@name='analytic_distribution']" position="after">
+                <field name="analytic_distribution_amounts" column_invisible="True"/>
+            </xpath>
+
         </field>
     </record>
 </odoo>

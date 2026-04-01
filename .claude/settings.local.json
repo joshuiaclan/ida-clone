@@ -5,7 +5,17 @@
       "Bash(curl -s \"https://raw.githubusercontent.com/odoo/odoo/18.0/addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml\")",
       "WebFetch(domain:github.com)",
       "Bash(curl -s https://raw.githubusercontent.com/odoo/odoo/19.0/addons/analytic/static/src/components/analytic_distribution/analytic_distribution.xml)",
-      "Bash(curl -s https://raw.githubusercontent.com/odoo/odoo/19.0/addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js)"
+      "Bash(curl -s https://raw.githubusercontent.com/odoo/odoo/19.0/addons/analytic/static/src/components/analytic_distribution/analytic_distribution.js)",
+      "Bash(python3 -c \"import odoo; print\\(odoo.__file__\\)\")",
+      "Bash(xargs grep:*)",
+      "Bash(python -c \"import odoo; import os; print\\(os.path.dirname\\(odoo.__file__\\)\\)\")",
+      "Bash(python3 -c \"import odoo; import os; print\\(os.path.dirname\\(odoo.__file__\\)\\)\")",
+      "Read(//c/Users/josha/**)",
+      "Bash(where python:*)",
+      "Bash(where python3:*)",
+      "Bash(pip show:*)",
+      "Bash(C:/Users/josha/AppData/Local/Python/bin/pip show:*)",
+      "Bash(C:/Users/josha/AppData/Local/Python/bin/python -c \"import odoo; import os; print\\(os.path.dirname\\(odoo.__file__\\)\\)\")"
     ]
   }
 }
