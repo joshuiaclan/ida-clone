@@ -164,6 +164,7 @@ class IdaLaborReport(models.TransientModel):
         )
 
         return {
+            'docs': self,
             'wizard': self,
             'projects': projects,
             'grand': grand,
