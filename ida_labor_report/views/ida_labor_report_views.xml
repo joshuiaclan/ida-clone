@@ -43,7 +43,7 @@
     <menuitem
         id="menu_ida_labor_report"
         name="Labor Cost Report"
-        parent="project.menu_project_reporting"
+        parent="project.menu_project_report"
         action="action_ida_labor_report_wizard"
         sequence="50"
     />

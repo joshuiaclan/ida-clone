@@ -7,10 +7,8 @@
         <field name="model">ida.labor.report</field>
         <field name="report_type">qweb-pdf</field>
         <field name="report_name">ida_labor_report.ida_labor_report_template</field>
-        <field name="report_file">ida_labor_report.ida_labor_report_template</field>
         <field name="print_report_name">'Labor Cost Report'</field>
         <field name="binding_model_id" ref="model_ida_labor_report"/>
-        <field name="paper_format_id" ref="base.paperformat_us"/>
     </record>
 
     <!-- ── QWeb template ─────────────────────────────────────────────────── -->
