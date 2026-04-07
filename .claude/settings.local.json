@@ -16,7 +16,10 @@
       "Bash(pip show:*)",
       "Bash(C:/Users/josha/AppData/Local/Python/bin/pip show:*)",
       "Bash(C:/Users/josha/AppData/Local/Python/bin/python -c \"import odoo; import os; print\\(os.path.dirname\\(odoo.__file__\\)\\)\")",
-      "WebFetch(domain:claude.ai)"
+      "WebFetch(domain:claude.ai)",
+      "Bash(python -c \"import sys; print\\(''\\\\n''.join\\(sys.path\\)\\)\")",
+      "Bash(find /c/Users/josha/Documents/CMEodoo -type f -name *.xml)",
+      "Bash(find /c/Users -type d -path */addons/account)"
     ]
   }
 }
