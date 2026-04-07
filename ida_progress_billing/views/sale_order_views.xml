@@ -15,7 +15,7 @@
                     name="percent_complete"
                     optional="show"
                     widget="percentage"
-                    string="% Complete"
+                    string="Percent Complete"
                 />
                 <field
                     name="amount_to_bill"

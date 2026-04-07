@@ -20,10 +20,11 @@ class SaleOrderLine(models.Model):
              '(% Complete × Contract Amount).',
     )
 
-    @api.depends('percent_complete', 'price_subtotal')
+    @api.depends('percent_complete', 'price_unit')
     def _compute_amount_to_bill(self):
         for line in self:
-            line.amount_to_bill = line.price_subtotal * (line.percent_complete / 100.0)
+            print(line.percent_complete)
+            line.amount_to_bill = line.price_unit * (line.percent_complete)
 
     def _prepare_invoice_line(self, **optional_values):
         """Carry percent_complete and contract_amount to the invoice line.

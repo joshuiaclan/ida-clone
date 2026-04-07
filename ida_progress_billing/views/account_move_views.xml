@@ -21,7 +21,7 @@
                     name="percent_complete"
                     optional="show"
                     widget="percentage"
-                    string="% Complete"
+                    string="Percent Complete"
                     readonly="1"
                 />
             </xpath>
