@@ -15,7 +15,8 @@
       "Bash(where python3:*)",
       "Bash(pip show:*)",
       "Bash(C:/Users/josha/AppData/Local/Python/bin/pip show:*)",
-      "Bash(C:/Users/josha/AppData/Local/Python/bin/python -c \"import odoo; import os; print\\(os.path.dirname\\(odoo.__file__\\)\\)\")"
+      "Bash(C:/Users/josha/AppData/Local/Python/bin/python -c \"import odoo; import os; print\\(os.path.dirname\\(odoo.__file__\\)\\)\")",
+      "WebFetch(domain:claude.ai)"
     ]
   }
 }

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_order_form_ida_progress_billing" model="ir.ui.view">
+        <field name="name">sale.order.form.ida.progress.billing</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+
+            <!--
+                Add % Complete and Amount to Bill as optional columns
+                in the order lines list, after the subtotal column.
+            -->
+            <xpath expr="//field[@name='order_line']//field[@name='price_subtotal']" position="after">
+                <field
+                    name="percent_complete"
+                    optional="show"
+                    widget="percentage"
+                    string="% Complete"
+                />
+                <field
+                    name="amount_to_bill"
+                    optional="show"
+                    string="Amount to Bill"
+                />
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

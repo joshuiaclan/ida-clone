@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Extends the standard invoice PDF report to include
+        Contract Amount and % Complete columns when any invoice line
+        carries progress billing data.
+
+        Columns are shown only when at least one line on the invoice
+        has a contract_amount or percent_complete value set.
+    -->
+    <template id="report_invoice_document_ida_progress" inherit_id="account.report_invoice_document">
+
+        <!-- ── Column headers ──────────────────────────────────────────────── -->
+        <xpath expr="//th[@name='th_priceunit']" position="before">
+            <t t-set="show_progress"
+               t-value="any(l.contract_amount or l.percent_complete for l in o.invoice_line_ids)"/>
+            <th t-if="show_progress" class="text-end">Contract Amount</th>
+            <th t-if="show_progress" class="text-end">% Complete</th>
+        </xpath>
+
+        <!-- ── Line cells ─────────────────────────────────────────────────── -->
+        <xpath expr="//td[@name='td_priceunit']" position="before">
+            <td t-if="show_progress" class="text-end">
+                <span t-if="line.contract_amount">
+                    <t t-esc="formatLang(line.contract_amount, currency_obj=line.currency_id)"/>
+                </span>
+            </td>
+            <td t-if="show_progress" class="text-end">
+                <span t-if="line.percent_complete">
+                    <t t-esc="'%.2f%%' % line.percent_complete"/>
+                </span>
+            </td>
+        </xpath>
+
+    </template>
+</odoo>
