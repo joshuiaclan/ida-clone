@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Wizard form view ──────────────────────────────────────────────── -->
+    <record id="view_ida_labor_report_wizard" model="ir.ui.view">
+        <field name="name">ida.labor.report.wizard.form</field>
+        <field name="model">ida.labor.report</field>
+        <field name="arch" type="xml">
+            <form string="Labor Cost Report">
+                <group string="Filters">
+                    <group>
+                        <field name="date_from"/>
+                        <field name="date_to"/>
+                    </group>
+                    <group>
+                        <field name="project_ids" widget="many2many_tags"/>
+                        <field name="employee_ids" widget="many2many_tags"/>
+                    </group>
+                </group>
+                <footer>
+                    <button
+                        string="Print Report"
+                        type="object"
+                        name="action_print_report"
+                        class="btn-primary"
+                    />
+                    <button string="Cancel" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Window action that opens the wizard ───────────────────────────── -->
+    <record id="action_ida_labor_report_wizard" model="ir.actions.act_window">
+        <field name="name">Labor Cost Report</field>
+        <field name="res_model">ida.labor.report</field>
+        <field name="view_mode">form</field>
+        <field name="view_id" ref="view_ida_labor_report_wizard"/>
+        <field name="target">new</field>
+    </record>
+
+    <!-- ── Menu item under Project → Reporting ───────────────────────────── -->
+    <menuitem
+        id="menu_ida_labor_report"
+        name="Labor Cost Report"
+        parent="project.menu_project_reporting"
+        action="action_ida_labor_report_wizard"
+        sequence="50"
+    />
+
+</odoo>

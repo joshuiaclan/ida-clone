@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Report action ─────────────────────────────────────────────────── -->
+    <record id="action_report_ida_labor" model="ir.actions.report">
+        <field name="name">Labor Cost Report</field>
+        <field name="model">ida.labor.report</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">ida_labor_report.ida_labor_report_template</field>
+        <field name="report_file">ida_labor_report.ida_labor_report_template</field>
+        <field name="print_report_name">'Labor Cost Report'</field>
+        <field name="binding_model_id" ref="model_ida_labor_report"/>
+        <field name="paper_format_id" ref="base.paperformat_us"/>
+    </record>
+
+    <!-- ── QWeb template ─────────────────────────────────────────────────── -->
+    <template id="ida_labor_report_template">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="wizard">
+                <t t-call="web.external_layout">
+                    <div class="page">
+
+                        <!-- ── Report title ──────────────────────────────── -->
+                        <div class="row mb-4">
+                            <div class="col-12 text-center">
+                                <h2>Labor Cost Report</h2>
+                                <h4>Contracted Labor vs. Labor Cost Billed</h4>
+                                <p class="text-muted">
+                                    Period:
+                                    <strong>
+                                        <t t-out="wizard.date_from"/>
+                                    </strong>
+                                    &amp;nbsp;–&amp;nbsp;
+                                    <strong>
+                                        <t t-out="wizard.date_to"/>
+                                    </strong>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- ── Per-project section ───────────────────────── -->
+                        <t t-foreach="projects" t-as="proj">
+
+                            <div class="mt-4">
+                                <h5 class="mb-1">
+                                    <strong>Project: </strong>
+                                    <t t-out="proj['project'].name"/>
+                                </h5>
+                                <hr class="mt-1 mb-2"/>
+
+                                <!-- Employee labor detail table -->
+                                <table class="table table-sm table-bordered">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Employee</th>
+                                            <th class="text-end">Rate / hr</th>
+                                            <th class="text-end">Hours Rendered</th>
+                                            <th class="text-end">Actual Labor Cost</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <t t-foreach="proj['employees']" t-as="emp">
+                                            <tr>
+                                                <td>
+                                                    <t t-out="emp['employee'].name"/>
+                                                </td>
+                                                <td class="text-end">
+                                                    <t t-out="formatLang(emp['rate'], currency_obj=currency)"/>
+                                                </td>
+                                                <td class="text-end">
+                                                    <t t-out="'%.2f' % emp['hours']"/>
+                                                </td>
+                                                <td class="text-end">
+                                                    <t t-out="formatLang(emp['cost'], currency_obj=currency)"/>
+                                                </td>
+                                            </tr>
+                                        </t>
+                                    </tbody>
+                                    <tfoot class="fw-bold">
+                                        <tr class="table-light">
+                                            <td colspan="2">Total</td>
+                                            <td class="text-end">
+                                                <t t-out="'%.2f' % proj['total_hours']"/>
+                                            </td>
+                                            <td class="text-end">
+                                                <t t-out="formatLang(proj['total_cost'], currency_obj=currency)"/>
+                                            </td>
+                                        </tr>
+                                    </tfoot>
+                                </table>
+
+                                <!-- Project financial summary -->
+                                <table class="table table-sm w-50 ms-auto">
+                                    <tbody>
+                                        <tr>
+                                            <td>Contracted Labor Amount</td>
+                                            <td class="text-end">
+                                                <t t-out="formatLang(proj['contracted'], currency_obj=currency)"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Labor Cost Billed</td>
+                                            <td class="text-end">
+                                                <t t-out="formatLang(proj['billed'], currency_obj=currency)"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Actual Labor Cost</td>
+                                            <td class="text-end">
+                                                <t t-out="formatLang(proj['total_cost'], currency_obj=currency)"/>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>Billed vs. Actual Cost</td>
+                                            <td class="text-end">
+                                                <t t-out="'%.2f %%' % proj['efficiency']"/>
+                                            </td>
+                                        </tr>
+                                        <tr class="fw-bold"
+                                            t-attf-class="fw-bold {{ 'text-success' if proj['variance'] >= 0 else 'text-danger' }}">
+                                            <td>Variance (Billed − Actual Cost)</td>
+                                            <td class="text-end">
+                                                <t t-out="formatLang(proj['variance'], currency_obj=currency)"/>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                        </t><!-- end t-foreach projects -->
+
+                        <!-- ── Grand Total ───────────────────────────────── -->
+                        <div class="mt-5">
+                            <h5><strong>Grand Total</strong></h5>
+                            <hr class="mt-1 mb-2"/>
+                            <table class="table table-sm table-bordered w-50 ms-auto">
+                                <tbody>
+                                    <tr>
+                                        <td>Total Hours Rendered</td>
+                                        <td class="text-end fw-bold">
+                                            <t t-out="'%.2f' % grand['total_hours']"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Actual Labor Cost</td>
+                                        <td class="text-end fw-bold">
+                                            <t t-out="formatLang(grand['total_cost'], currency_obj=currency)"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Contracted Labor</td>
+                                        <td class="text-end fw-bold">
+                                            <t t-out="formatLang(grand['contracted'], currency_obj=currency)"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Total Labor Cost Billed</td>
+                                        <td class="text-end fw-bold">
+                                            <t t-out="formatLang(grand['billed'], currency_obj=currency)"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Overall Efficiency (Billed / Actual)</td>
+                                        <td class="text-end fw-bold">
+                                            <t t-out="'%.2f %%' % grand['efficiency']"/>
+                                        </td>
+                                    </tr>
+                                    <tr t-attf-class="fw-bold {{ 'text-success' if grand['variance'] >= 0 else 'text-danger' }}">
+                                        <td>Total Variance</td>
+                                        <td class="text-end">
+                                            <t t-out="formatLang(grand['variance'], currency_obj=currency)"/>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+                </t><!-- end external_layout -->
+            </t><!-- end t-foreach docs -->
+        </t>
+    </template>
+
+</odoo>

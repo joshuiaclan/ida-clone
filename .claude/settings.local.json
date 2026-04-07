@@ -19,7 +19,13 @@
       "WebFetch(domain:claude.ai)",
       "Bash(python -c \"import sys; print\\(''\\\\n''.join\\(sys.path\\)\\)\")",
       "Bash(find /c/Users/josha/Documents/CMEodoo -type f -name *.xml)",
-      "Bash(find /c/Users -type d -path */addons/account)"
+      "Bash(find /c/Users -type d -path */addons/account)",
+      "Bash(node gen_ida_docs.js)",
+      "Bash(npm install:*)",
+      "Bash(python scripts/office/validate.py IDA_Customisation_Documentation.docx)",
+      "Bash(pip install:*)",
+      "Bash(python -m pip install defusedxml -q)",
+      "Bash(python -m pip install lxml -q)"
     ]
   }
 }
