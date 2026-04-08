@@ -25,7 +25,12 @@
       "Bash(python scripts/office/validate.py IDA_Customisation_Documentation.docx)",
       "Bash(pip install:*)",
       "Bash(python -m pip install defusedxml -q)",
-      "Bash(python -m pip install lxml -q)"
+      "Bash(python -m pip install lxml -q)",
+      "Bash(python -c \"import subprocess; result = subprocess.run\\([''where'', ''python''], capture_output=True, text=True\\); print\\(result.stdout\\)\")",
+      "Read(//c/Program Files/**)",
+      "Read(//d//**)",
+      "Bash(find D:/Projects/ida-clone -name *.cfg -o -name odoo.conf)",
+      "Bash(find C:/Users/josha -path */sale/views/sale_portal*)"
     ]
   }
 }

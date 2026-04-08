@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Hide the Shipping Address block from the customer portal sale order view.
+        The span#shipping_address is only rendered when partner_shipping_id differs
+        from partner_invoice_id; we remove it entirely via xpath replace.
+    -->
+    <template
+        id="sale_order_portal_content_ida_hide_shipping"
+        inherit_id="sale.sale_order_portal_content"
+        name="Hide Shipping Address (IDA)">
+
+        <xpath expr="//span[@id='shipping_address']" position="replace"/>
+
+    </template>
+</odoo>
