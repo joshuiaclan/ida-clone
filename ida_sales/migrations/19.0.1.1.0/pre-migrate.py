@@ -9,7 +9,7 @@ def migrate(cr, version):
     # Patch stale view arches in the database
     cr.execute("""
         UPDATE ir_ui_view
-        SET arch_db = replace(arch_db::text, 'accepted_signature_name', 'accepted_signature')
+        SET arch_db = replace(arch_db::text, 'accepted_signature_name', 'accepted_signature')::jsonb
         WHERE arch_db::text LIKE '%accepted_signature_name%'
     """)
 
