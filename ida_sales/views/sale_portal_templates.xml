@@ -22,7 +22,7 @@
         inherit_id="sale.sale_order_portal_content"
         name="Agreement Acceptance Section (IDA)">
 
-        <xpath expr="//div[hasclass('page')]" position="inside">
+        <xpath expr="//div[@id='content']" position="after">
             <div id="ida_agreement_acceptance" class="mt-5">
                 <p class="mb-3">
                     <strong>We (Client) accept the terms of this Agreement</strong>
