@@ -13,6 +13,7 @@
     'depends': [
         'sale_management',
         'project',
+        'portal',
     ],
     'data': [
         'data/ir_sequence_data.xml',

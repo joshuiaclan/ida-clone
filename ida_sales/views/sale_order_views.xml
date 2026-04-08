@@ -22,4 +22,31 @@
 
         </field>
     </record>
+
+    <!-- Agreement Acceptance notebook tab -->
+    <record id="view_order_form_ida_sales_acceptance" model="ir.ui.view">
+        <field name="name">sale.order.form.ida.sales.acceptance</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Agreement Acceptance" name="ida_agreement_acceptance">
+                    <group string="We (Client) accept the terms of this Agreement">
+                        <group>
+                            <field name="accepted_signature_name"/>
+                            <field name="accepted_printed_name"/>
+                            <field name="accepted_email"/>
+                            <field name="accepted_title"/>
+                            <field name="accepted_date"/>
+                        </group>
+                        <group>
+                            <field name="accepted_legal_entity"/>
+                            <field name="accepted_entity_address"/>
+                            <field name="accepted_invoice_email"/>
+                        </group>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
 </odoo>

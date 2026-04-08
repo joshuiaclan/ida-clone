@@ -60,3 +60,40 @@ class SaleOrder(models.Model):
     def _onchange_deal_type(self):
         if self.deal_type != 'existing_project':
             self.base_project_id = False
+
+    # ── Agreement Acceptance fields (filled by client via portal) ────────────
+
+    accepted_signature_name = fields.Char(
+        string='Signature',
+        copy=False,
+        help='Client signature name as entered on the portal.',
+    )
+    accepted_printed_name = fields.Char(
+        string='Printed Name',
+        copy=False,
+    )
+    accepted_email = fields.Char(
+        string='Email Address',
+        copy=False,
+    )
+    accepted_title = fields.Char(
+        string='Title',
+        copy=False,
+    )
+    accepted_date = fields.Date(
+        string='Date',
+        copy=False,
+        help='Date the client accepted the agreement via the portal.',
+    )
+    accepted_legal_entity = fields.Char(
+        string='Legal Entity',
+        copy=False,
+    )
+    accepted_entity_address = fields.Char(
+        string='Entity Address',
+        copy=False,
+    )
+    accepted_invoice_email = fields.Char(
+        string='Invoice Email',
+        copy=False,
+    )
