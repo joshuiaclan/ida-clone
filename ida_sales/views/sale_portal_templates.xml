@@ -105,7 +105,7 @@
                     <form
                         method="post"
                         t-attf-action="/my/orders/#{sale_order.id}/accept_terms"
-                        class="o_portal_details">
+                        class="ida_acceptance_form">
 
                         <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                         <input type="hidden" name="access_token" t-att-value="sale_order.access_token"/>
