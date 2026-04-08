@@ -33,7 +33,7 @@
                 <page string="Agreement Acceptance" name="ida_agreement_acceptance">
                     <group string="We (Client) accept the terms of this Agreement">
                         <group>
-                            <field name="accepted_signature_name"/>
+                            <field name="accepted_signature" widget="signature" string="Signature"/>
                             <field name="accepted_printed_name"/>
                             <field name="accepted_email"/>
                             <field name="accepted_title"/>

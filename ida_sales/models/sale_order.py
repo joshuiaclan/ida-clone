@@ -63,10 +63,11 @@ class SaleOrder(models.Model):
 
     # ── Agreement Acceptance fields (filled by client via portal) ────────────
 
-    accepted_signature_name = fields.Char(
+    accepted_signature = fields.Binary(
         string='Signature',
         copy=False,
-        help='Client signature name as entered on the portal.',
+        attachment=True,
+        help='Client signature image captured on the portal.',
     )
     accepted_printed_name = fields.Char(
         string='Printed Name',
