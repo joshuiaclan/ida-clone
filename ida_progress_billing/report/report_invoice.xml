@@ -1,25 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <template id="report_invoice_document_ida_progress" inherit_id="account.report_invoice_document">
-        <!-- ── Column headers (after Description, before Unit Price) ───────── -->
-        <xpath expr="//th[@name='th_quantity']" position="before">
+
+        <!-- ══ HEADERS ══════════════════════════════════════════════════════════ -->
+
+        <!-- Replace Quantity header with all progress billing headers -->
+        <xpath expr="//th[@name='th_quantity']" position="replace">
             <th class="text-end">Contract Amount</th>
-            <th class="text-end">Percent Complete</th>
+            <th class="text-end">% to Bill</th>
+            <th class="text-end">Prior Billed</th>
+            <th class="text-end">Total Billed</th>
+            <th class="text-end">Total % Billed</th>
+            <th class="text-end">Total Billed Amount</th>
         </xpath>
 
-        <!-- ── Line cells (after the description cell on every row) ─────────── -->
-        <xpath expr="//td[@name='td_quantity']" position="before">
+        <!-- Remove Unit Price and Amount headers -->
+        <xpath expr="//th[@name='th_priceunit']" position="replace"/>
+        <xpath expr="//th[@name='th_subtotal']" position="replace"/>
+
+        <!-- ══ LINE CELLS ════════════════════════════════════════════════════════ -->
+
+        <!-- Replace Quantity cell with all progress billing cells -->
+        <xpath expr="//td[@name='td_quantity']" position="replace">
             <td class="text-end">
-                <span t-if="line.contract_amount">
-                    <t t-out="line.contract_amount"/>
-                </span>
+                <span t-field="line.contract_amount"
+                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
             </td>
             <td class="text-end">
-                <span t-if="line.percent_complete">
-                    <t t-out="line.percent_complete * 100"/>
-                </span>
+                <span t-esc="'%.2f%%' % (line.percent_complete * 100)"/>
+            </td>
+            <td class="text-end">
+                <span t-field="line.prior_billed"
+                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+            </td>
+            <td class="text-end">
+                <span t-field="line.total_billed"
+                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+            </td>
+            <td class="text-end">
+                <span t-esc="'%.2f%%' % line.total_percent_billed"/>
+            </td>
+            <td class="text-end">
+                <span t-field="line.total_billed_amount"
+                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
             </td>
         </xpath>
+
+        <!-- Remove Unit Price and Amount cells -->
+        <xpath expr="//td[@name='td_price_unit']" position="replace"/>
+        <xpath expr="//td[@name='td_subtotal']" position="replace"/>
+
+        <!-- ══ GROUPED LINE CELLS (collapsed / grouped view) ════════════════════ -->
+
+        <xpath expr="//td[@name='td_quantity_grouped']" position="replace">
+            <td class="text-end">
+                <span t-field="line.contract_amount"
+                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+            </td>
+            <td class="text-end">
+                <span t-esc="'%.2f%%' % (line.percent_complete * 100)"/>
+            </td>
+            <td class="text-end">
+                <span t-field="line.prior_billed"
+                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+            </td>
+            <td class="text-end">
+                <span t-field="line.total_billed"
+                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+            </td>
+            <td class="text-end">
+                <span t-esc="'%.2f%%' % line.total_percent_billed"/>
+            </td>
+            <td class="text-end">
+                <span t-field="line.total_billed_amount"
+                      t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
+            </td>
+        </xpath>
+
+        <xpath expr="//td[@name='td_price_unit_grouped']" position="replace"/>
+        <xpath expr="//td[@name='td_subtotal_grouped']" position="replace"/>
 
     </template>
 </odoo>
