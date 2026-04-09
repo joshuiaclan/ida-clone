@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!--
+        Remove the Shipping Address block from the Sale Order / Quotation
+        PDF printout.  The block is a nested <t t-if> inside the
+        information_block t-set in sale.report_saleorder_document.
+    -->
+    <template
+        id="report_saleorder_document_ida_hide_shipping"
+        inherit_id="sale.report_saleorder_document"
+        name="Hide Shipping Address in SO Report (IDA)">
+
+        <xpath
+            expr="//t[@t-set='information_block']//t[@t-if='doc.partner_shipping_id != doc.partner_invoice_id']"
+            position="replace"/>
+
+    </template>
+</odoo>

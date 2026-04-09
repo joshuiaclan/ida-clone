@@ -7,8 +7,8 @@
         <field name="arch" type="xml">
 
             <!--
-                Add Contract Amount, % Complete as optional columns
-                in the invoice lines list (Invoice Lines tab).
+                Add progress billing columns as optional columns in the
+                Invoice Lines tab, before Unit Price.
             -->
             <xpath expr="//field[@name='invoice_line_ids']//field[@name='price_unit']" position="before">
                 <field
@@ -21,7 +21,32 @@
                     name="percent_complete"
                     optional="show"
                     widget="percentage"
-                    string="Percent Complete"
+                    string="Percent to Bill"
+                    readonly="1"
+                />
+                <field
+                    name="prior_billed"
+                    optional="show"
+                    string="Prior Billed"
+                    readonly="1"
+                />
+                <field
+                    name="total_billed"
+                    optional="show"
+                    string="Total Billed"
+                    readonly="1"
+                />
+                <field
+                    name="total_percent_billed"
+                    optional="show"
+                    widget="percentage"
+                    string="Total Percent Billed"
+                    readonly="1"
+                />
+                <field
+                    name="total_billed_amount"
+                    optional="show"
+                    string="Total Billed Amount"
                     readonly="1"
                 />
             </xpath>

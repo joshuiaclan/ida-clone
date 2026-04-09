@@ -7,20 +7,59 @@
         <field name="arch" type="xml">
 
             <!--
-                Add % Complete and Amount to Bill as optional columns
-                in the order lines list, after the subtotal column.
+                Add progress billing columns as optional columns in the order
+                lines list, after the Subtotal column.
+
+                percent_complete  – total work done % (informational)
+                percent_to_bill   – % to bill this period (bidirectional with Amount to Bill)
+                amount_to_bill    – monetary amount to bill (bidirectional with Percent to Bill)
+                prior_billed      – sum of previously posted invoice amounts for this line
+                total_billed      – prior_billed + amount_to_bill
+                total_percent_billed  – total_billed / contract amount %
+                total_billed_amount   – contract amount × total_percent_billed
             -->
             <xpath expr="//field[@name='order_line']//field[@name='price_subtotal']" position="after">
                 <field
                     name="percent_complete"
+                    optional="hide"
+                    widget="percentage"
+                    string="% Complete"
+                />
+                <field
+                    name="percent_to_bill"
                     optional="show"
                     widget="percentage"
-                    string="Percent Complete"
+                    string="Percent to Bill"
                 />
                 <field
                     name="amount_to_bill"
                     optional="show"
                     string="Amount to Bill"
+                />
+                <field
+                    name="prior_billed"
+                    optional="show"
+                    string="Prior Billed"
+                    readonly="1"
+                />
+                <field
+                    name="total_billed"
+                    optional="show"
+                    string="Total Billed"
+                    readonly="1"
+                />
+                <field
+                    name="total_percent_billed"
+                    optional="show"
+                    widget="percentage"
+                    string="Total Percent Billed"
+                    readonly="1"
+                />
+                <field
+                    name="total_billed_amount"
+                    optional="show"
+                    string="Total Billed Amount"
+                    readonly="1"
                 />
             </xpath>
 
