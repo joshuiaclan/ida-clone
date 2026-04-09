@@ -19,7 +19,6 @@
         'data/ir_sequence_data.xml',
         'views/sale_order_views.xml',
         'views/sale_portal_templates.xml',
-        'report/sale_report_templates.xml',
     ],
     'installable': True,
     'application': False,

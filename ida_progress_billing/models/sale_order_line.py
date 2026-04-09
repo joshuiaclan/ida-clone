@@ -91,18 +91,18 @@ class SaleOrderLine(models.Model):
             else:
                 pct = 0.0
             line.total_percent_billed = pct
-            line.total_billed_amount = line.price_subtotal * pct / 100.0
+            line.total_billed_amount = line.price_subtotal * pct
 
     # ── Onchange: bidirectional percent_to_bill ↔ amount_to_bill ─────────────
 
     @api.onchange('percent_to_bill')
     def _onchange_percent_to_bill(self):
-        self.amount_to_bill = self.price_subtotal * (self.percent_to_bill / 100.0)
+        self.amount_to_bill = self.price_subtotal * (self.percent_to_bill)
 
     @api.onchange('amount_to_bill')
     def _onchange_amount_to_bill(self):
         if self.price_subtotal:
-            self.percent_to_bill = self.amount_to_bill / self.price_subtotal * 100.0
+            self.percent_to_bill = self.amount_to_bill / self.price_subtotal
 
     # ── Invoice line preparation ──────────────────────────────────────────────
 
