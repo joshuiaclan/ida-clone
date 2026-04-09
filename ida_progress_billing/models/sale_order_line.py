@@ -87,7 +87,7 @@ class SaleOrderLine(models.Model):
             total = line.prior_billed + line.amount_to_bill
             line.total_billed = total
             if line.price_subtotal:
-                pct = total / line.price_subtotal * 100.0
+                pct = total / line.price_subtotal
             else:
                 pct = 0.0
             line.total_percent_billed = pct

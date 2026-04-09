@@ -79,8 +79,8 @@ class AccountMoveLine(models.Model):
             total = line.prior_billed + line.price_subtotal
             line.total_billed = total
             if line.contract_amount:
-                pct = total / line.contract_amount * 100.0
+                pct = total / line.contract_amount
             else:
                 pct = 0.0
             line.total_percent_billed = pct
-            line.total_billed_amount = line.contract_amount * pct / 100.0
+            line.total_billed_amount = line.contract_amount * pct
