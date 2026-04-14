@@ -104,20 +104,30 @@ class SaleOrderLine(models.Model):
         if self.price_subtotal:
             self.percent_to_bill = self.amount_to_bill / self.price_subtotal
 
+    # ── Invoiceability ────────────────────────────────────────────────────────
+
+    @api.depends('amount_to_bill', 'state', 'qty_invoiced', 'product_uom_qty',
+                 'qty_delivered', 'product_id')
+    def _compute_qty_to_invoice(self):
+        """Allow re-invoicing whenever amount_to_bill is set, regardless of
+        how much has already been invoiced."""
+        super()._compute_qty_to_invoice()
+        for line in self:
+            if line.amount_to_bill > 0 and line.state in ('sale', 'done'):
+                line.qty_to_invoice = 1.0
+
     # ── Invoice line preparation ──────────────────────────────────────────────
 
     def _prepare_invoice_line(self, **optional_values):
-        """Carry progress billing data to the invoice line.
-
-        price_unit is adjusted so the invoice line total equals amount_to_bill.
-        percent_to_bill is stored on the invoice line as percent_complete.
-        """
+        """Invoice line total = amount_to_bill; percent_to_bill and
+        contract_amount are carried to the invoice line."""
         res = super()._prepare_invoice_line(**optional_values)
 
         res['percent_complete'] = self.percent_to_bill
         res['contract_amount'] = self.price_subtotal
 
-        if self.amount_to_bill and self.product_uom_qty:
-            res['price_unit'] = self.amount_to_bill / self.product_uom_qty
+        if self.amount_to_bill:
+            res['quantity'] = 1.0
+            res['price_unit'] = self.amount_to_bill
 
         return res
