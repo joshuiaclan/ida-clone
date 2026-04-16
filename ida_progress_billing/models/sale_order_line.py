@@ -106,28 +106,27 @@ class SaleOrderLine(models.Model):
 
     # ── Invoiceability ────────────────────────────────────────────────────────
 
-    @api.depends('amount_to_bill', 'state', 'qty_invoiced', 'product_uom_qty',
-                 'qty_delivered', 'product_id')
+    @api.depends('amount_to_bill', 'percent_to_bill', 'state',
+                 'qty_invoiced', 'product_uom_qty', 'qty_delivered', 'product_id')
     def _compute_qty_to_invoice(self):
-        """Allow re-invoicing whenever amount_to_bill is set, regardless of
-        how much has already been invoiced."""
+        """Allow re-invoicing whenever percent_to_bill or amount_to_bill is set,
+        regardless of how much has already been invoiced."""
         super()._compute_qty_to_invoice()
         for line in self:
-            if line.amount_to_bill > 0 and line.state in ('sale', 'done'):
+            if (line.amount_to_bill > 0 or line.percent_to_bill > 0) \
+                    and line.state in ('sale', 'done'):
                 line.qty_to_invoice = 1.0
 
     # ── Invoice line preparation ──────────────────────────────────────────────
 
     def _prepare_invoice_line(self, **optional_values):
-        """Invoice line total = amount_to_bill; percent_to_bill and
-        contract_amount are carried to the invoice line."""
+        """Invoice line total = amount_to_bill.  Lines with no billing amount
+        (added to the invoice for customer viewing) get price_unit = 0."""
         res = super()._prepare_invoice_line(**optional_values)
 
         res['percent_complete'] = self.percent_to_bill
         res['contract_amount'] = self.price_subtotal
-
-        if self.amount_to_bill:
-            res['quantity'] = 1.0
-            res['price_unit'] = self.amount_to_bill
+        res['quantity'] = 1.0
+        res['price_unit'] = self.amount_to_bill  # 0.0 when not billing this line
 
         return res

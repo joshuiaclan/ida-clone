@@ -10,6 +10,11 @@
                 Add progress billing columns as optional columns in the
                 Invoice Lines tab, before Unit Price.
             -->
+            <!-- Rename "Price" column to "Current Billed" -->
+            <xpath expr="//field[@name='invoice_line_ids']//field[@name='price_unit']" position="attributes">
+                <attribute name="string">Current Billed</attribute>
+            </xpath>
+
             <xpath expr="//field[@name='invoice_line_ids']//field[@name='price_unit']" position="before">
                 <field
                     name="contract_amount"
