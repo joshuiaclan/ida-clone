@@ -17,7 +17,7 @@
             </xpath>
 
             <!-- PDF printing toggle in the Other Info tab -->
-            <xpath expr="//page[@name='other_info']" position="inside">
+            <xpath expr="//page[@name='other_information']" position="inside">
                 <group string="Printing Options">
                     <field name="show_line_notes" widget="boolean_toggle"
                            string="Show Line Notes Instead of Price"/>

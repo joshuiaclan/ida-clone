@@ -7,10 +7,10 @@
         <!-- Replace Quantity header with all progress billing headers -->
         <xpath expr="//th[@name='th_quantity']" position="replace">
             <th class="text-end">Contract Amount</th>
-            <th class="text-end">% to Bill</th>
-            <th class="text-end">Prior Billed</th>
+            <th class="text-end">Percent to Bill</th>
+            <th class="text-end">Prior Billed</th>t
             <th class="text-end">Total Billed</th>
-            <th class="text-end">Total % Billed</th>
+            <th class="text-end">Percent Complete</th>
             <th class="text-end">Total Billed Amount</th>
         </xpath>
 
@@ -27,7 +27,8 @@
                       t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
             </td>
             <td class="text-end">
-                <span t-esc="'%.2f%%' % (line.percent_complete * 100)"/>
+                <span t-esc="line.percent_complete"
+                      t-options='{"widget": "float", "precision": 2}'/>%
             </td>
             <td class="text-end">
                 <span t-field="line.prior_billed"
@@ -38,7 +39,8 @@
                       t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
             </td>
             <td class="text-end">
-                <span t-esc="'%.2f%%' % line.total_percent_billed"/>
+                <span t-esc="line.total_percent_billed"
+                      t-options='{"widget": "float", "precision": 2}'/>%
             </td>
             <td class="text-end">
                 <span t-field="line.total_billed_amount"
@@ -58,7 +60,8 @@
                       t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
             </td>
             <td class="text-end">
-                <span t-esc="'%.2f%%' % (line.percent_complete * 100)"/>
+                <span t-esc="line.percent_complete"
+                      t-options='{"widget": "float", "precision": 2}'/>%
             </td>
             <td class="text-end">
                 <span t-field="line.prior_billed"
@@ -69,7 +72,8 @@
                       t-options='{"widget": "monetary", "display_currency": line.currency_id}'/>
             </td>
             <td class="text-end">
-                <span t-esc="'%.2f%%' % line.total_percent_billed"/>
+                <span t-esc="line.total_percent_billed"
+                      t-options='{"widget": "float", "precision": 2}'/>%
             </td>
             <td class="text-end">
                 <span t-field="line.total_billed_amount"
