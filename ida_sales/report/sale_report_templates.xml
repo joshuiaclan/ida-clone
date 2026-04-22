@@ -15,4 +15,81 @@
             position="replace"/>
 
     </template>
+
+    <!--
+        When show_line_notes is enabled on the order, hide the Unit Price and
+        Amount columns and replace Amount with a per-line Notes column instead.
+    -->
+    <template
+        id="report_saleorder_document_ida_line_notes"
+        inherit_id="sale.report_saleorder_document"
+        name="Show Line Notes Instead of Price in SO Report (IDA)">
+
+        <!-- ── Column headers ────────────────────────────────────────────── -->
+
+        <!-- Unit Price header: hidden when show_line_notes is on -->
+        <xpath expr="//th[@name='th_priceunit']" position="replace">
+            <th name="th_priceunit" class="text-end text-nowrap"
+                t-if="not doc.show_line_notes">Unit Price</th>
+        </xpath>
+
+        <!-- Amount header: replaced by Notes when show_line_notes is on -->
+        <xpath expr="//th[@name='th_subtotal']" position="replace">
+            <th class="text-end" t-if="not doc.show_line_notes"><span>Amount</span></th>
+            <th class="text-start" t-if="doc.show_line_notes">Notes</th>
+        </xpath>
+
+        <!-- ── Regular product row ───────────────────────────────────────── -->
+
+        <!-- Unit Price cell: hidden when show_line_notes is on -->
+        <xpath expr="//td[@name='td_product_priceunit']" position="replace">
+            <td name="td_product_priceunit" class="text-end text-nowrap"
+                t-if="not doc.show_line_notes">
+                <span t-if="not collapse_prices and line.discount &lt; 0"
+                      t-out="(1 - line.discount / 100.0) * line.price_unit"
+                      t-options='{"widget": "float", "decimal_precision": "Product Price"}'/>
+                <span t-elif="not collapse_prices" t-field="line.price_unit">25.00</span>
+            </td>
+        </xpath>
+
+        <!-- Amount cell: shows subtotal or line note depending on toggle -->
+        <xpath expr="//td[@name='td_product_subtotal']" position="replace">
+            <td name="td_product_subtotal" class="text-end o_price_total"
+                t-if="not doc.show_line_notes">
+                <t t-if="not line.is_downpayment and not collapse_prices">
+                    <span t-if="price_field == 'price_subtotal'"
+                          t-field="line.price_subtotal">27.00</span>
+                    <span t-else="" t-field="line.price_total">27.00</span>
+                </t>
+            </td>
+            <td class="text-start" t-if="doc.show_line_notes">
+                <span t-field="line.line_note"/>
+            </td>
+        </xpath>
+
+        <!-- ── Section row total ─────────────────────────────────────────── -->
+
+        <xpath expr="//td[@name='td_section_price']" position="replace">
+            <td name="td_section_price" class="text-end o_price_total"
+                t-if="show_section_total and not doc.show_line_notes">
+                <span name="price_subtotal_section"
+                      t-out="line._get_section_totals(price_field)"
+                      class="text-nowrap"
+                      t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}">27.00</span>
+            </td>
+        </xpath>
+
+        <!-- ── Combo row total ───────────────────────────────────────────── -->
+
+        <xpath expr="//td[@name='td_combo_price']" position="replace">
+            <td name="td_combo_price" class="text-end o_price_total"
+                t-if="not doc.show_line_notes">
+                <span t-if="not collapse_prices" name="price_subtotal_combo"
+                      t-out="line._get_combo_totals(price_field)"
+                      class="text-nowrap"
+                      t-options="{'widget': 'monetary', 'display_currency': doc.currency_id}">27.00</span>
+            </td>
+        </xpath>
+
+    </template>
 </odoo>

@@ -11,6 +11,19 @@
                 <field name="product_uom_qty" optional="hide" string="Quantity"/>
             </xpath>
 
+            <!-- Add Notes column to order lines (optional, shown by default) -->
+            <xpath expr="//field[@name='order_line']//field[@name='price_subtotal']" position="after">
+                <field name="line_note" optional="show" string="Notes"/>
+            </xpath>
+
+            <!-- PDF printing toggle in the Other Info tab -->
+            <xpath expr="//page[@name='other_info']" position="inside">
+                <group string="Printing Options">
+                    <field name="show_line_notes" widget="boolean_toggle"
+                           string="Show Line Notes Instead of Price"/>
+                </group>
+            </xpath>
+
             <!-- Insert Project Classification section above the customer field -->
             <xpath expr="//field[@name='payment_term_id']" position="after">
                 <field name="deal_type" colspan="2" required="1"/>

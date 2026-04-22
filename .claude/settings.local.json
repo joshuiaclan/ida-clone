@@ -30,7 +30,8 @@
       "Read(//c/Program Files/**)",
       "Read(//d//**)",
       "Bash(find D:/Projects/ida-clone -name *.cfg -o -name odoo.conf)",
-      "Bash(find C:/Users/josha -path */sale/views/sale_portal*)"
+      "Bash(find C:/Users/josha -path */sale/views/sale_portal*)",
+      "WebSearch"
     ]
   }
 }

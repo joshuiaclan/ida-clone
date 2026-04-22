@@ -61,6 +61,15 @@ class SaleOrder(models.Model):
         if self.deal_type != 'existing_project':
             self.base_project_id = False
 
+    # ── PDF Printing Options ──────────────────────────────────────────────────
+
+    show_line_notes = fields.Boolean(
+        string='Show Line Notes Instead of Price',
+        default=False,
+        help='When enabled, the PDF quotation hides the Unit Price and Amount '
+             'columns and shows a Notes column per order line instead.',
+    )
+
     # ── Agreement Acceptance fields (filled by client via portal) ────────────
 
     accepted_signature = fields.Binary(
