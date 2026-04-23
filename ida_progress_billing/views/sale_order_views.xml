@@ -24,28 +24,33 @@
                     optional="hide"
                     widget="percentage"
                     string="% Complete"
+                    column_invisible="parent.state != 'sale'"
                 />
                 <field
                     name="percent_to_bill"
                     optional="show"
                     widget="percentage"
                     string="Percent to Bill"
+                    column_invisible="parent.state != 'sale'"
                 />
                 <field
                     name="amount_to_bill"
                     optional="show"
                     string="Amount to Bill"
+                    column_invisible="parent.state != 'sale'"
                 />
                 <field
                     name="prior_billed"
                     optional="show"
                     string="Prior Billed"
+                    column_invisible="parent.state != 'sale'"
                     readonly="1"
                 />
                 <field
                     name="total_billed"
                     optional="show"
                     string="Total Billed"
+                    column_invisible="parent.state != 'sale'"
                     readonly="1"
                 />
                 <field
@@ -53,12 +58,14 @@
                     optional="show"
                     widget="percentage"
                     string="Total Percent Billed"
+                    column_invisible="parent.state != 'sale'"
                     readonly="1"
                 />
                 <field
                     name="total_billed_amount"
                     optional="show"
                     string="Total Billed Amount"
+                    column_invisible="parent.state != 'sale'"
                     readonly="1"
                 />
             </xpath>
