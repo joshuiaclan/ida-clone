@@ -31,7 +31,8 @@
       "Read(//d//**)",
       "Bash(find D:/Projects/ida-clone -name *.cfg -o -name odoo.conf)",
       "Bash(find C:/Users/josha -path */sale/views/sale_portal*)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(curl -s \"https://raw.githubusercontent.com/odoo/odoo/19.0/addons/sale/report/ir_actions_report_templates.xml\")"
     ]
   }
 }

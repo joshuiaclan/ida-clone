@@ -11,7 +11,7 @@
         name="Hide Shipping Address in SO Report (IDA)">
 
         <xpath
-            expr="//t[@t-set='information_block']//t[@t-if='doc.partner_shipping_id != doc.partner_invoice_id']"
+            expr="//t[@t-if='doc.partner_shipping_id != doc.partner_invoice_id']"
             position="replace"/>
 
     </template>
