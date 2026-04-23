@@ -6,6 +6,11 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
 
+            <!-- Move chatter below the main form (full-width layout) -->
+            <xpath expr="//form" position="attributes">
+                <attribute name="class" add="o_form_no_aside" separator=" "/>
+            </xpath>
+
             <!-- Hide quantity column in order lines (optional, hidden by default) -->
             <xpath expr="//field[@name='order_line']//field[@name='product_uom_qty']" position="replace">
                 <field name="product_uom_qty" optional="hide" string="Quantity"/>

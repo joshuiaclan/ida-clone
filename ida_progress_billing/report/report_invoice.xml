@@ -8,7 +8,7 @@
         <xpath expr="//th[@name='th_quantity']" position="replace">
             <th class="text-end">Contract Amount</th>
             <th class="text-end">Percent to Bill</th>
-            <th class="text-end">Prior Billed</th>t
+            <th class="text-end">Prior Billed</th>
             <th class="text-end">Total Billed</th>
             <th class="text-end">Percent Complete</th>
             <th class="text-end">Total Billed Amount</th>
