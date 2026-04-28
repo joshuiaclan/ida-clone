@@ -23,7 +23,12 @@ class SaleOrder(models.Model):
         # can read the number while projects are being created inside super().
         for order in self:
             if order.deal_type == 'new_project' and not order.base_project_number:
-                order.base_project_number = order._generate_base_project_number()
+                number = order._generate_base_project_number()
+                order.base_project_number = number
+                self.env['ida.base.project'].create({
+                    'number': number,
+                    'sale_order_id': order.id,
+                })
 
         res = super().action_confirm()
 
