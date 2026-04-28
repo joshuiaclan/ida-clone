@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- No custom group needed: approval level configuration is restricted
+         to Sales Managers via model access rules below, and approvers are
+         regular internal users identified by their assignment to a level. -->
+</odoo>

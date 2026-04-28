@@ -1,0 +1,6 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sale_approval_level_manager,sale.approval.level manager,model_sale_approval_level,sales_team.group_sale_manager,1,1,1,1
+access_sale_approval_level_user,sale.approval.level user,model_sale_approval_level,base.group_user,1,0,0,0
+access_sale_order_approval_user,sale.order.approval user,model_sale_order_approval,base.group_user,1,1,1,0
+access_sale_order_approval_manager,sale.order.approval manager,model_sale_order_approval,sales_team.group_sale_manager,1,1,1,1
+access_sale_approval_refuse_wizard,sale.approval.refuse.wizard,model_sale_approval_refuse_wizard,base.group_user,1,1,1,1

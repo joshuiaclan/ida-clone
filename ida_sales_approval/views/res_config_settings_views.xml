@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_ida_approval" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.ida.approval</field>
+        <field name="model">res.config.settings</field>
+        <field name="inherit_id" ref="sale.res_config_settings_view_form"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//div[@id='sale_order_settings']" position="after">
+                <div id="sale_approval_settings">
+                    <h2>Sales Approval</h2>
+                    <div class="row mt16 o_settings_container">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="sale_approval_required" widget="boolean_toggle"/>
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="sale_approval_required"
+                                       string="Require Approval for Sales Quotations"/>
+                                <div class="text-muted">
+                                    Quotations must pass all approval levels before
+                                    they can be confirmed as Sales Orders.
+                                </div>
+
+                                <!-- Approval levels table — shown when feature is on -->
+                                <div class="content-group mt16"
+                                     invisible="not sale_approval_required">
+                                    <label string="Approval Levels"
+                                           class="fw-bold d-block mb-2"/>
+                                    <p class="text-muted">
+                                        Drag to reorder levels. Approvals proceed
+                                        from the lowest to the highest level.
+                                    </p>
+                                    <field name="sale_approval_level_ids"
+                                           nolabel="1"
+                                           context="{'default_company_id': company_id}">
+                                        <list editable="bottom">
+                                            <field name="sequence" widget="handle"/>
+                                            <field name="name"
+                                                   placeholder="e.g. Manager Approval"
+                                                   required="1"/>
+                                            <field name="approver_ids"
+                                                   widget="many2many_tags"
+                                                   options="{'no_create': True}"
+                                                   domain="[('share', '=', False)]"
+                                                   required="1"/>
+                                            <field name="required_approvals"
+                                                   string="Required Approvals"/>
+                                            <field name="company_id" column_invisible="True"/>
+                                        </list>
+                                    </field>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+
+        </field>
+    </record>
+</odoo>

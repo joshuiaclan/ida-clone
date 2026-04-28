@@ -5,14 +5,17 @@ class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
     def _generate_base_project_number(self):
-        """Generate a structured project number: YYYY-NNN.
+        """Generate a structured project number: YY-NNNN.
 
-        The sub-project index (-01, -02, …) is appended when the number is
+        Format: {2-digit year}-{4-digit sequence}
+        Example: 26-0001
+
+        The sub-project index (-001, -002, …) is appended when the number is
         written to each project in action_confirm().
         """
         self.ensure_one()
-        year = fields.Date.today().year
-        seq = self.env['ir.sequence'].next_by_code('ida.project.main') or '001'
+        year = fields.Date.today().strftime('%y')   # 2-digit year, e.g. "26"
+        seq = self.env['ir.sequence'].next_by_code('ida.project.main') or '0001'
         return f"{year}-{seq}"
 
     def action_confirm(self):
@@ -43,7 +46,7 @@ class SaleOrder(models.Model):
 
             # Main order project — only if it is not also a line project
             if order.project_id and order.project_id.id not in line_project_ids:
-                order.project_id.name = f"{order.base_project_number}-{idx:02d}"
+                order.project_id.name = f"{order.base_project_number}-{idx:03d}"
                 seen.add(order.project_id.id)
                 idx += 1
 
@@ -54,7 +57,7 @@ class SaleOrder(models.Model):
                     continue
                 product_name = line.product_id.name or ''
                 suffix = f" {product_name}" if product_name else ''
-                project.name = f"{order.base_project_number}-{idx:02d}{suffix}"
+                project.name = f"{order.base_project_number}-{idx:03d}{suffix}"
                 seen.add(project.id)
                 idx += 1
 

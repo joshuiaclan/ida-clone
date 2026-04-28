@@ -32,7 +32,10 @@
       "Bash(find D:/Projects/ida-clone -name *.cfg -o -name odoo.conf)",
       "Bash(find C:/Users/josha -path */sale/views/sale_portal*)",
       "WebSearch",
-      "Bash(curl -s \"https://raw.githubusercontent.com/odoo/odoo/19.0/addons/sale/report/ir_actions_report_templates.xml\")"
+      "Bash(curl -s \"https://raw.githubusercontent.com/odoo/odoo/19.0/addons/sale/report/ir_actions_report_templates.xml\")",
+      "Bash(node gen_sales_approval_guide.js)",
+      "Bash(python scripts/office/validate.py \"D:/Projects/ida-clone/ida_sales_approval/doc/IDA_Sales_Approval_User_Guide.docx\")",
+      "Bash(powershell -Command \"Get-Item 'D:\\\\Projects\\\\ida-clone\\\\ida_sales_approval\\\\doc\\\\IDA_Sales_Approval_User_Guide.docx' | Select-Object Name, Length, LastWriteTime\")"
     ]
   }
 }
