@@ -13,8 +13,7 @@
         'security/ir.model.access.csv',
         'data/ir_sequence_data.xml',
         'views/ida_base_project_views.xml',
-        'views/project_project_views.xml',
-        'views/sale_order_views.xml',
+        'views/project_project_views.xml'
     ],
     'installable': True,
     'application': False,

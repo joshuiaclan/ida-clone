@@ -34,7 +34,7 @@
                 <field name="deal_type" colspan="2" required="1"/>
                 <field
                     name="base_project_number" string="Base Project" colspan="2"
-                    invisible="deal_type != 'new_project'"
+                    readonly="1"
                 />
                 <field
                     name="base_project_id" string="Project Number" colspan="2"
