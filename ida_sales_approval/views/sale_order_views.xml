@@ -36,7 +36,7 @@
 
             <!-- Hide the standard Confirm button when approval is required but not yet granted -->
             <xpath expr="//button[@name='action_confirm']" position="attributes">
-                <attribute name="invisible">state != 'draft' or (approval_required and approval_state != 'approved')</attribute>
+                <attribute name="invisible">1</attribute>
             </xpath>
 
             <!-- ── Approvals notebook tab ───────────────────────────────────── -->
