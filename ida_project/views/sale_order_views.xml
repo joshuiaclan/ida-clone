@@ -6,14 +6,18 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
 
-            <!-- Filter Project Number to only show subprojects that belong to a base project -->
-            <xpath expr="//field[@name='project_id']" position="attributes">
+            <!-- Filter Project Number dropdown to only show projects that belong to a base project -->
+            <xpath expr="//field[@name='linked_project_id']" position="attributes">
                 <attribute name="domain">[('base_project_id', '!=', False)]</attribute>
             </xpath>
 
-            <!-- Add Base Project field after Project Number, clickable to view sub projects -->
-            <xpath expr="//field[@name='project_id']" position="after">
-                <field name="base_project_id" readonly="1" options="{'no_create': True, 'no_edit': True}"/>
+            <!-- Show Base Project (ida.base.project) after Project Number — clickable,
+                 auto-populated via onchange, also set on new-project confirmation -->
+            <xpath expr="//field[@name='linked_project_id']" position="after">
+                <field name="base_project_id"
+                       string="Base Project"
+                       readonly="1"
+                       options="{'no_create': True, 'no_edit': True}"/>
             </xpath>
 
         </field>

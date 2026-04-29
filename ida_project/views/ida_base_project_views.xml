@@ -25,9 +25,6 @@
                             <field name="number"/>
                             <field name="location"/>
                         </group>
-                        <group>
-                            <field name="sale_order_id"/>
-                        </group>
                     </group>
                     <notebook>
                         <page string="Sub Projects" name="sub_projects">

@@ -23,12 +23,6 @@ class IdaBaseProject(models.Model):
     location = fields.Char(
         string='Location',
     )
-    sale_order_id = fields.Many2one(
-        'sale.order',
-        string='Sales Order',
-        readonly=True,
-        ondelete='set null',
-    )
     project_ids = fields.One2many(
         'project.project',
         'base_project_id',

@@ -4,18 +4,21 @@ from odoo import models, fields, api
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
-    # Non-stored compute avoids a circular FK with ida.base.project.sale_order_id
     base_project_id = fields.Many2one(
         'ida.base.project',
         string='Base Project',
-        compute='_compute_base_project_id',
         copy=False,
+        tracking=True,
+        ondelete='set null',
     )
 
-    @api.depends('project_id.base_project_id')
-    def _compute_base_project_id(self):
-        for order in self:
-            order.base_project_id = order.project_id.base_project_id
+    @api.onchange('linked_project_id')
+    def _onchange_linked_project_id(self):
+        """Auto-populate base_project_id from the selected project's base project."""
+        if self.linked_project_id and self.linked_project_id.base_project_id:
+            self.base_project_id = self.linked_project_id.base_project_id
+        elif not self.linked_project_id:
+            self.base_project_id = False
 
     def _generate_base_project_number(self):
         """Generate a structured project number: YY-NNNN.
@@ -27,37 +30,30 @@ class SaleOrder(models.Model):
         written to each project in action_confirm().
         """
         self.ensure_one()
-        year = fields.Date.today().strftime('%y')   # 2-digit year, e.g. "26"
+        year = fields.Date.today().strftime('%y')
         seq = self.env['ir.sequence'].next_by_code('ida.project.main') or '0001'
         return f"{year}-{seq}"
 
     def action_confirm(self):
         # Pre-generate BEFORE super() so _timesheet_create_project_prepare_values()
-        # can read the number while projects are being created inside super().
-        base_projects = {}  # order.id -> ida.base.project record
+        # can read base_project_id.number while projects are being created.
         for order in self:
-            if order.deal_type == 'new_project' and not order.base_project_number:
+            if order.deal_type == 'new_project' and not order.base_project_id:
                 number = order._generate_base_project_number()
-                order.base_project_number = number
                 base_project = self.env['ida.base.project'].create({
                     'number': number,
-                    'sale_order_id': order.id,
                 })
-                base_projects[order.id] = base_project
+                order.base_project_id = base_project
 
         res = super().action_confirm()
 
-        # After super(), all projects are created — assign the full number with
-        # a three-digit sub-sequence to each project linked to this order.
-        # Also link each subproject to its ida.base.project record.
+        # After super(), all projects are created — assign the full sub-sequence
+        # number to each project and link them to the base project record.
         for order in self:
-            if not (order.deal_type == 'new_project' and order.base_project_number):
+            if not (order.deal_type == 'new_project' and order.base_project_id):
                 continue
 
-            base_project = base_projects.get(order.id) or self.env['ida.base.project'].search(
-                [('sale_order_id', '=', order.id)], limit=1
-            )
-
+            base_project = order.base_project_id
             idx = 1
             seen = set()
 
@@ -71,8 +67,8 @@ class SaleOrder(models.Model):
             # Main order project — only if it is not also a line project
             if order.project_id and order.project_id.id not in line_project_ids:
                 order.project_id.write({
-                    'name': f"{order.base_project_number}-{idx:03d}",
-                    'base_project_id': base_project.id if base_project else False,
+                    'name': f"{base_project.number}-{idx:03d}",
+                    'base_project_id': base_project.id,
                 })
                 seen.add(order.project_id.id)
                 idx += 1
@@ -83,8 +79,8 @@ class SaleOrder(models.Model):
                 if not project or project.id in seen:
                     continue
                 project.write({
-                    'name': f"{order.base_project_number}-{idx:03d}",
-                    'base_project_id': base_project.id if base_project else False,
+                    'name': f"{base_project.number}-{idx:03d}",
+                    'base_project_id': base_project.id,
                 })
                 seen.add(project.id)
                 idx += 1
