@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import ValidationError
 
 
 class SaleOrder(models.Model):
@@ -50,7 +51,7 @@ class SaleOrder(models.Model):
         # After super(), all projects are created — assign the full sub-sequence
         # number to each project and link them to the base project record.
         for order in self:
-            if not (order.deal_type == 'new_project' and order.base_project_id):
+            if order.deal_type == 'additional_services':
                 continue
 
             base_project = order.base_project_id
