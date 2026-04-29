@@ -5,16 +5,16 @@
         PDF printout.  The block is a nested <t t-if> inside the
         information_block t-set in sale.report_saleorder_document.
     -->
-    <template
-        id="report_saleorder_document_ida_hide_shipping"
-        inherit_id="sale.report_saleorder_document"
-        name="Hide Shipping Address in SO Report (IDA)">
+<!--    <template-->
+<!--        id="report_saleorder_document_ida_hide_shipping"-->
+<!--        inherit_id="sale.report_saleorder_document"-->
+<!--        name="Hide Shipping Address in SO Report (IDA)">-->
 
-        <xpath
-            expr="//t[@t-if='doc.partner_shipping_id != doc.partner_invoice_id']"
-            position="replace"/>
+<!--        <xpath-->
+<!--            expr="//t[@t-if='doc.partner_shipping_id != doc.partner_invoice_id']"-->
+<!--            position="replace"/>-->
 
-    </template>
+<!--    </template>-->
 
     <!--
         When show_line_notes is enabled on the order, hide the Unit Price and

@@ -27,6 +27,6 @@
         parent="project.menu_project_config"
         action="action_ida_base_project"
         groups="project.group_project_manager"
-        sequence="50"/>
+        sequence="10"/>
 
 </odoo>

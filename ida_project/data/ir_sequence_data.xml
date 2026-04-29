@@ -8,7 +8,7 @@
     <record id="seq_ida_project_main" model="ir.sequence">
         <field name="name">IDA Project Number</field>
         <field name="code">ida.project.main</field>
-        <field name="padding">4</field>
+        <field name="padding">5</field>
         <field name="number_next">1</field>
         <field name="number_increment">1</field>
         <field name="use_date_range">True</field>

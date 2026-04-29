@@ -62,7 +62,7 @@ class SaleOrder(models.Model):
                     continue
                 product_name = line.product_id.name or ''
                 suffix = f" {product_name}" if product_name else ''
-                project.name = f"{order.base_project_number}-{idx:03d}{suffix}"
+                project.name = f"{order.base_project_number}-{idx:03d}"
                 seen.add(project.id)
                 idx += 1
 
