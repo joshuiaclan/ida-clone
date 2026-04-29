@@ -1,8 +1,16 @@
-from odoo import models, fields
+from odoo import models, fields, api
 
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
+
+    base_project_id = fields.Many2one(
+        'ida.base.project',
+        string='Base Project',
+        copy=False,
+        index=True,
+        ondelete='set null',
+    )
 
     def _generate_base_project_number(self):
         """Generate a structured project number: YY-NNNN.
@@ -18,6 +26,13 @@ class SaleOrder(models.Model):
         seq = self.env['ir.sequence'].next_by_code('ida.project.main') or '0001'
         return f"{year}-{seq}"
 
+    @api.onchange('project_id')
+    def _onchange_project_id_base_project(self):
+        if self.project_id and self.project_id.base_project_id:
+            self.base_project_id = self.project_id.base_project_id
+        else:
+            self.base_project_id = False
+
     def action_confirm(self):
         # Pre-generate BEFORE super() so _timesheet_create_project_prepare_values()
         # can read the number while projects are being created inside super().
@@ -30,6 +45,7 @@ class SaleOrder(models.Model):
                     'number': number,
                     'sale_order_id': order.id,
                 })
+                order.base_project_id = base_project
                 base_projects[order.id] = base_project
 
         res = super().action_confirm()
@@ -64,7 +80,7 @@ class SaleOrder(models.Model):
                 seen.add(order.project_id.id)
                 idx += 1
 
-            # Per-line projects — append product name
+            # Per-line projects — name and link to base project
             for line in order.order_line:
                 project = line.project_id
                 if not project or project.id in seen:
