@@ -25,14 +25,6 @@ class SaleOrder(models.Model):
         help='Required when the order is linked to an existing or additional-services project.',
     )
 
-    @api.constrains('deal_type', 'linked_project_id')
-    def _check_existing_project_required(self):
-        for order in self:
-            if order.deal_type == 'existing_project' and not order.linked_project_id:
-                raise ValidationError(
-                    _('A Project Number must be selected when Deal Type is "Existing Project".')
-                )
-
     @api.onchange('deal_type')
     def _onchange_deal_type(self):
         if self.deal_type != 'existing_project':

@@ -16,7 +16,7 @@
             <xpath expr="//field[@name='linked_project_id']" position="after">
                 <field name="base_project_id"
                        string="Base Project"
-                       readonly="1"
+                       readonly="deal_type == 'new_project' or not deal_type"
                        options="{'no_create': True, 'no_edit': True}"/>
             </xpath>
 

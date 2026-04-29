@@ -34,8 +34,8 @@
                 <field name="deal_type" colspan="2" required="1"/>
                 <field
                     name="linked_project_id" string="Project Number" colspan="2"
-                    invisible="deal_type == 'new_project' or not deal_type"
-                    required="deal_type != 'new_project' and deal_type"
+                    invisible="deal_type != 'additional_services' or not deal_type"
+                    required="deal_type == 'additional_services'"
                     options="{'no_create': True}"
                 />
             </xpath>
