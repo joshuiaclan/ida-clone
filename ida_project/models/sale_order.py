@@ -21,10 +21,10 @@ class SaleOrder(models.Model):
             self.base_project_id = False
 
     def _generate_base_project_number(self):
-        """Generate a structured project number: YY-NNNN.
+        """Generate a structured project number: YY-NNNNN.
 
-        Format: {2-digit year}-{4-digit sequence}
-        Example: 26-0001
+        Format: {2-digit year}-{5-digit sequence}
+        Example: 26-00001
 
         The sub-project index (-001, -002, …) is appended when the number is
         written to each project in action_confirm().
