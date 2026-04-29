@@ -10,6 +10,6 @@ class SaleOrderLine(models.Model):
         is applied in SaleOrder.action_confirm()."""
         values = super()._timesheet_create_project_prepare_values()
         order = self.order_id
-        if order.deal_type == 'new_project' and order.base_project_id:
+        if order.base_project_id and order.deal_type in ('new_project', 'existing_project'):
             values['name'] = order.base_project_id.number
         return values
