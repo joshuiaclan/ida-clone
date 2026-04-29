@@ -71,7 +71,7 @@ class SaleOrder(models.Model):
 
             # For existing_project, the onchange may not have been persisted to DB.
             # Resolve base_project_id server-side so the naming loop can run.
-            elif order.deal_type == 'existing_project' and not order.base_project_id:
+            elif order.deal_type in ('existing_project', 'additional_services'):
                 if order.linked_project_id and order.linked_project_id.base_project_id:
                     order.base_project_id = order.linked_project_id.base_project_id
 
