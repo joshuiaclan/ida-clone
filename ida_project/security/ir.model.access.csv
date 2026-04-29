@@ -1,3 +1,2 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-access_ida_base_project_user,ida.base.project user,model_ida_base_project,base.group_user,1,1,1,0
-access_ida_base_project_manager,ida.base.project manager,model_ida_base_project,project.group_project_manager,1,1,1,1
+access_ida_base_project_user,ida.base.project user,model_ida_base_project,base.group_user,1,1,1,1
