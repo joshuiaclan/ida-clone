@@ -31,14 +31,14 @@ class SaleOrder(models.Model):
         """
         self.ensure_one()
         year = fields.Date.today().strftime('%y')
-        seq = self.env['ir.sequence'].next_by_code('ida.project.main') or '0001'
+        seq = self.env['ir.sequence'].next_by_code('ida.project.main') or '00001'
         return f"{year}-{seq}"
 
     def _next_subproject_index(self, base_project, exclude_ids=None):
         """Return the next available 3-digit sub-sequence index for base_project.
 
         Scans all existing project.project records linked to base_project,
-        extracts the numeric suffix (e.g. 1 from '26-0001-001'), and returns
+        extracts the numeric suffix (e.g. 1 from '26-00001-001'), and returns
         max + 1 so new subprojects continue the sequence instead of restarting.
         """
         domain = [('base_project_id', '=', base_project.id)]
