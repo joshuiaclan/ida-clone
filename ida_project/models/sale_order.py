@@ -1,5 +1,4 @@
 from odoo import models, fields, api
-from odoo.exceptions import ValidationError
 
 
 class SaleOrder(models.Model):
@@ -35,6 +34,30 @@ class SaleOrder(models.Model):
         seq = self.env['ir.sequence'].next_by_code('ida.project.main') or '0001'
         return f"{year}-{seq}"
 
+    def _next_subproject_index(self, base_project, exclude_ids=None):
+        """Return the next available 3-digit sub-sequence index for base_project.
+
+        Scans all existing project.project records linked to base_project,
+        extracts the numeric suffix (e.g. 1 from '26-0001-001'), and returns
+        max + 1 so new subprojects continue the sequence instead of restarting.
+        """
+        domain = [('base_project_id', '=', base_project.id)]
+        if exclude_ids:
+            domain.append(('id', 'not in', list(exclude_ids)))
+
+        existing = self.env['project.project'].search(domain)
+        prefix = f"{base_project.number}-"
+        max_idx = 0
+        for proj in existing:
+            if proj.name and proj.name.startswith(prefix):
+                # The suffix is the 3-digit block immediately after the prefix
+                suffix_part = proj.name[len(prefix):len(prefix) + 3]
+                try:
+                    max_idx = max(max_idx, int(suffix_part))
+                except ValueError:
+                    pass
+        return max_idx + 1
+
     def action_confirm(self):
         # Pre-generate BEFORE super() so _timesheet_create_project_prepare_values()
         # can read base_project_id.number while projects are being created.
@@ -55,7 +78,9 @@ class SaleOrder(models.Model):
                 continue
 
             base_project = order.base_project_id
-            idx = 1
+            if not base_project:
+                continue
+
             seen = set()
 
             # Collect project IDs that belong to order lines
@@ -64,6 +89,18 @@ class SaleOrder(models.Model):
                 for line in order.order_line
                 if line.project_id
             }
+
+            # Gather all projects to be named in this run so we can exclude
+            # them from the existing-index scan (they have no suffix yet).
+            new_project_ids = set()
+            if order.project_id and order.project_id.id not in line_project_ids:
+                new_project_ids.add(order.project_id.id)
+            for line in order.order_line:
+                if line.project_id:
+                    new_project_ids.add(line.project_id.id)
+
+            # Start from the next available index after existing subprojects
+            idx = self._next_subproject_index(base_project, exclude_ids=new_project_ids)
 
             # Main order project — only if it is not also a line project
             if order.project_id and order.project_id.id not in line_project_ids:
