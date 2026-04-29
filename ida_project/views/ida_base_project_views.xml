@@ -25,7 +25,7 @@
     <menuitem
         id="menu_ida_base_project"
         name="Base Projects"
-        parent="project.menu_projects_config"
+        parent="project.menu_project_config"
         action="action_ida_base_project"
         sequence="20"/>
 
