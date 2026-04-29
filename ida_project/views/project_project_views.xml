@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── Projects list view — add Base Project as optional hidden column ── -->
+    <record id="view_project_ida_base_project" model="ir.ui.view">
+        <field name="name">project.project.list.ida.base.project</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project"/>
+        <field name="arch" type="xml">
+            <!-- Hidden field so the form has access to the value -->
+            <xpath expr="//list" position="inside">
+                <field name="base_project_id" optional="hide" string="Base Project"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ── Project search view — add Group By: Base Project ──────────────── -->
+    <record id="view_project_project_filter_ida_base_project" model="ir.ui.view">
+        <field name="name">project.project.search.ida.base.project</field>
+        <field name="model">project.project</field>
+        <field name="inherit_id" ref="project.view_project_project_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search/group" position="inside">
+                <filter string="Base Project" name="group_by_base_project"
+                        context="{'group_by': 'base_project_id'}"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

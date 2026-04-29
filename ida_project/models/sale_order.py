@@ -21,23 +21,29 @@ class SaleOrder(models.Model):
     def action_confirm(self):
         # Pre-generate BEFORE super() so _timesheet_create_project_prepare_values()
         # can read the number while projects are being created inside super().
+        base_projects = {}  # order.id -> ida.base.project record
         for order in self:
             if order.deal_type == 'new_project' and not order.base_project_number:
                 number = order._generate_base_project_number()
                 order.base_project_number = number
-                self.env['ida.base.project'].create({
+                base_project = self.env['ida.base.project'].create({
                     'number': number,
                     'sale_order_id': order.id,
                 })
+                base_projects[order.id] = base_project
 
         res = super().action_confirm()
 
         # After super(), all projects are created — assign the full number with
-        # a two-digit sub-sequence to each project linked to this order.
-        # Line-generated projects also get the product name appended.
+        # a three-digit sub-sequence to each project linked to this order.
+        # Also link each subproject to its ida.base.project record.
         for order in self:
             if not (order.deal_type == 'new_project' and order.base_project_number):
                 continue
+
+            base_project = base_projects.get(order.id) or self.env['ida.base.project'].search(
+                [('sale_order_id', '=', order.id)], limit=1
+            )
 
             idx = 1
             seen = set()
@@ -51,7 +57,10 @@ class SaleOrder(models.Model):
 
             # Main order project — only if it is not also a line project
             if order.project_id and order.project_id.id not in line_project_ids:
-                order.project_id.name = f"{order.base_project_number}-{idx:03d}"
+                order.project_id.write({
+                    'name': f"{order.base_project_number}-{idx:03d}",
+                    'base_project_id': base_project.id if base_project else False,
+                })
                 seen.add(order.project_id.id)
                 idx += 1
 
@@ -60,9 +69,10 @@ class SaleOrder(models.Model):
                 project = line.project_id
                 if not project or project.id in seen:
                     continue
-                product_name = line.product_id.name or ''
-                suffix = f" {product_name}" if product_name else ''
-                project.name = f"{order.base_project_number}-{idx:03d}"
+                project.write({
+                    'name': f"{order.base_project_number}-{idx:03d}",
+                    'base_project_id': base_project.id if base_project else False,
+                })
                 seen.add(project.id)
                 idx += 1
 
