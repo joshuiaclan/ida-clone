@@ -4,13 +4,18 @@ from odoo import models, fields, api
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
+    # Non-stored compute avoids a circular FK with ida.base.project.sale_order_id
     base_project_id = fields.Many2one(
         'ida.base.project',
         string='Base Project',
+        compute='_compute_base_project_id',
         copy=False,
-        index=True,
-        ondelete='set null',
     )
+
+    @api.depends('project_id.base_project_id')
+    def _compute_base_project_id(self):
+        for order in self:
+            order.base_project_id = order.project_id.base_project_id
 
     def _generate_base_project_number(self):
         """Generate a structured project number: YY-NNNN.
@@ -26,13 +31,6 @@ class SaleOrder(models.Model):
         seq = self.env['ir.sequence'].next_by_code('ida.project.main') or '0001'
         return f"{year}-{seq}"
 
-    @api.onchange('project_id')
-    def _onchange_project_id_base_project(self):
-        if self.project_id and self.project_id.base_project_id:
-            self.base_project_id = self.project_id.base_project_id
-        else:
-            self.base_project_id = False
-
     def action_confirm(self):
         # Pre-generate BEFORE super() so _timesheet_create_project_prepare_values()
         # can read the number while projects are being created inside super().
@@ -45,7 +43,6 @@ class SaleOrder(models.Model):
                     'number': number,
                     'sale_order_id': order.id,
                 })
-                order.base_project_id = base_project
                 base_projects[order.id] = base_project
 
         res = super().action_confirm()
