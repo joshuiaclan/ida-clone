@@ -13,10 +13,10 @@
 
             <!-- Show Base Project (ida.base.project) after Project Number — clickable,
                  auto-populated via onchange, also set on new-project confirmation -->
-            <xpath expr="//field[@name='linked_project_id']" position="after">
+            <xpath expr="//field[@name='linked_project_id']" position="before">
                 <field name="base_project_id"
                        string="Base Project"
-                       readonly="deal_type == 'new_project' or not deal_type"
+                       readonly="deal_type == 'new_project' or not deal_type or state in ['sale', 'cancel']"
                        options="{'no_create': True, 'no_edit': True}"/>
             </xpath>
 

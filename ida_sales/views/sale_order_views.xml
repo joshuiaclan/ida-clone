@@ -31,7 +31,9 @@
 
             <!-- Insert Project Classification section above the customer field -->
             <xpath expr="//field[@name='payment_term_id']" position="after">
-                <field name="deal_type" colspan="2" required="1"/>
+                <field name="deal_type" colspan="2" required="1"
+                    readonly="state in ['sale', 'cancel']"
+                />
                 <field
                     name="linked_project_id" string="Project Number" colspan="2"
                     invisible="deal_type != 'additional_services' or not deal_type"
