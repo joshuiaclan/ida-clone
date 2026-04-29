@@ -1,16 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!--
-        Generates the middle segment of the project number (e.g. "001").
+        noupdate="1" ensures the sequence counter is NEVER reset on module
+        upgrade. Without this, every -u ida_project would write number_next=1
+        back to the record, causing the middle segment to restart from 00001.
+        Generates the middle segment of the project number (e.g. "00001").
         The year prefix and sub-project suffix are added in Python.
-        use_date_range resets the counter to 1 each calendar year.
+        use_date_range resets the counter to 1 each new calendar year.
     -->
-    <record id="seq_ida_project_main" model="ir.sequence">
-        <field name="name">IDA Project Number</field>
-        <field name="code">ida.project.main</field>
-        <field name="padding">5</field>
-        <field name="number_next">1</field>
-        <field name="number_increment">1</field>
-        <field name="use_date_range">True</field>
-    </record>
+    <data noupdate="1">
+        <record id="seq_ida_project_main" model="ir.sequence">
+            <field name="name">IDA Project Number</field>
+            <field name="code">ida.project.main</field>
+            <field name="padding">5</field>
+            <field name="number_next">1</field>
+            <field name="number_increment">1</field>
+            <field name="use_date_range">True</field>
+        </record>
+    </data>
 </odoo>
