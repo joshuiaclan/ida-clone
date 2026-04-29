@@ -6,6 +6,7 @@
     'author': 'Joshua Aclan',
     'depends': [
         'ida_sales',
+        'project',
         'sale_project',
     ],
     'data': [

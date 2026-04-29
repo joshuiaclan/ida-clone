@@ -18,7 +18,6 @@
         <field name="name">Base Projects</field>
         <field name="res_model">ida.base.project</field>
         <field name="view_mode">list</field>
-        <field name="view_id" ref="view_ida_base_project_list"/>
     </record>
 
     <!-- ── Menu: Project > Configuration > Base Projects ─────────────────── -->
@@ -27,6 +26,7 @@
         name="Base Projects"
         parent="project.menu_project_config"
         action="action_ida_base_project"
-        sequence="20"/>
+        groups="project.group_project_manager"
+        sequence="50"/>
 
 </odoo>
