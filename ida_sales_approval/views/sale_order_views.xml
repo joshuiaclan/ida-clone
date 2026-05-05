@@ -8,10 +8,7 @@
 
             <!-- ── Approval status bar (shown only when approval is active) ── -->
             <xpath expr="//field[@name='state']" position="after">
-                <field name="approval_state"
-                       widget="statusbar"
-                       statusbar_visible="for_approval,approved"
-                       invisible="not approval_state"/>
+                <field name="approval_state" widget="statusbar" statusbar_visible="for_approval,approved" invisible="not approval_state"/>
             </xpath>
 
             <!-- ── Invisible helper fields ─────────────────────────────────── -->
@@ -21,66 +18,35 @@
             </xpath>
 
             <!-- ── Action buttons ──────────────────────────────────────────── -->
-
-            <!--
-                "Submit for Approval" — shown when approval is required and
-                the order has not yet been submitted or has been refused.
-            -->
             <xpath expr="//button[@name='action_confirm']" position="before">
-                <button name="action_submit_approval"
-                        string="Submit for Approval"
-                        type="object"
-                        class="btn-primary"
-                        invisible="
-                            not approval_required
-                            or state not in ('draft', 'sent')
-                            or approval_state in ('for_approval', 'approved')
-                        "/>
 
-                <!-- Approve — shown only to the current pending approver -->
-                <button name="action_approve"
-                        string="Approve"
-                        type="object"
-                        class="btn-success"
-                        invisible="approval_state != 'for_approval' or not is_current_approver"/>
+                <!-- Submit for Approval: shown when approval required and not yet submitted/approved -->
+                <button name="action_submit_approval" string="Submit for Approval" type="object" class="btn-primary" invisible="not approval_required or state not in ('draft', 'sent') or approval_state in ('for_approval', 'approved')"/>
 
-                <!-- Refuse — shown only to the current pending approver -->
-                <button name="action_refuse"
-                        string="Refuse"
-                        type="object"
-                        class="btn-danger"
-                        invisible="approval_state != 'for_approval' or not is_current_approver"/>
+                <!-- Approve: shown only to the current pending approver -->
+                <button name="action_approve" string="Approve" type="object" class="btn-success" invisible="approval_state != 'for_approval' or not is_current_approver"/>
 
-                <!-- Reset to Draft — shown when quotation is refused -->
-                <button name="action_reset_approval"
-                        string="Reset to Draft"
-                        type="object"
-                        invisible="approval_state != 'refused'"/>
+                <!-- Refuse: shown only to the current pending approver -->
+                <button name="action_refuse" string="Refuse" type="object" class="btn-danger" invisible="approval_state != 'for_approval' or not is_current_approver"/>
+
+                <!-- Reset to Draft: shown when quotation is refused -->
+                <button name="action_reset_approval" string="Reset to Draft" type="object" invisible="approval_state != 'refused'"/>
+
             </xpath>
 
-            <!--
-                Hide the standard Confirm button when approval is required
-                but has not yet been granted.
-            -->
+            <!-- Hide the standard Confirm button when approval is required but not yet granted -->
             <xpath expr="//button[@name='action_confirm']" position="attributes">
-                <attribute name="invisible">
-                    state != 'draft'
-                    or (approval_required and approval_state != 'approved')
-                </attribute>
+                <attribute name="invisible">1</attribute>
             </xpath>
 
             <!-- ── Approvals notebook tab ───────────────────────────────────── -->
             <xpath expr="//notebook" position="inside">
-                <page string="Approvals" name="ida_approvals"
-                      invisible="not approval_ids">
+                <page string="Approvals" name="ida_approvals" invisible="not approval_ids">
                     <field name="approval_ids" readonly="1">
                         <list>
                             <field name="level_id" string="Level"/>
                             <field name="approver_id" string="Approver"/>
-                            <field name="state"
-                                   decoration-success="state == 'approved'"
-                                   decoration-danger="state == 'refused'"
-                                   decoration-muted="state == 'pending'"/>
+                            <field name="state" decoration-success="state == 'approved'" decoration-danger="state == 'refused'" decoration-muted="state == 'pending'"/>
                             <field name="date" string="Date"/>
                             <field name="note" string="Note / Reason"/>
                         </list>

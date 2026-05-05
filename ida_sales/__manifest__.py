@@ -1,6 +1,6 @@
 {
     'name': 'IDA Sales',
-    'version': '19.0.1.0.1',
+    'version': '19.0.1.0.2',
     'category': 'Sales',
     'summary': 'Sales Order Customization — Project Classification Fields',
     'description': """

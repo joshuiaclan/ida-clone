@@ -15,53 +15,22 @@ class SaleOrder(models.Model):
         tracking=True,
     )
 
-    base_project_number = fields.Char(
-        string='Base Project Number',
-        readonly=True,
-        copy=False,
-        tracking=True,
-        help='Auto-generated when a New Project order is confirmed.',
-    )
-
-    base_project_id = fields.Many2one(
+    # Renamed from base_project_id (project.project) to free the name for
+    # ida_project's base_project_id (ida.base.project).
+    linked_project_id = fields.Many2one(
         comodel_name='project.project',
-        string='Base Project',
+        string='Project Number',
         copy=False,
         tracking=True,
-        help='Required when the order is linked to an existing project.',
+        help='Required when the order is linked to an existing or additional-services project.',
     )
-
-    def action_confirm(self):
-        res = super().action_confirm()
-        for order in self:
-            if order.deal_type == 'new_project' and not order.base_project_number:
-                order.base_project_number = order._generate_base_project_number()
-        return res
-
-    def _generate_base_project_number(self):
-        """Return the base project number for this order.
-
-        Override in downstream modules (e.g. ida_project) to produce a
-        fully-structured number.  The default implementation uses the simple
-        ida.sales.project.number sequence defined in this module.
-        """
-        self.ensure_one()
-        return self.env['ir.sequence'].next_by_code('ida.sales.project.number') or '/'
-
-    @api.constrains('deal_type', 'base_project_id')
-    def _check_existing_project_required(self):
-        for order in self:
-            if order.deal_type == 'existing_project' and not order.base_project_id:
-                raise ValidationError(
-                    _('A Base Project must be selected when Project Type is "Existing Project".')
-                )
 
     @api.onchange('deal_type')
     def _onchange_deal_type(self):
         if self.deal_type != 'existing_project':
-            self.base_project_id = False
+            self.linked_project_id = False
 
-    # ── PDF Printing Options ──────────────────────────────────────────────────
+    # ── PDF Printing Options ───────────────────────────────────────────────
 
     show_line_notes = fields.Boolean(
         string='Show Line Notes Instead of Price',
@@ -70,7 +39,7 @@ class SaleOrder(models.Model):
              'columns and shows a Notes column per order line instead.',
     )
 
-    # ── Agreement Acceptance fields (filled by client via portal) ────────────
+    # ── Agreement Acceptance fields (filled by client via portal) ─────────
 
     accepted_signature = fields.Binary(
         string='Acceptance Signature',

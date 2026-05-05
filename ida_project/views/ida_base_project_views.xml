@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── List view ──────────────────────────────────────────────────────── -->
+    <record id="view_ida_base_project_list" model="ir.ui.view">
+        <field name="name">ida.base.project.list</field>
+        <field name="model">ida.base.project</field>
+        <field name="arch" type="xml">
+            <list string="Base Projects" create="0" delete="0" editable="bottom">
+                <field name="number" string="Number" readonly="1"/>
+                <field name="location" string="Location"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── Form view ──────────────────────────────────────────────────────── -->
+    <record id="view_ida_base_project_form" model="ir.ui.view">
+        <field name="name">ida.base.project.form</field>
+        <field name="model">ida.base.project</field>
+        <field name="arch" type="xml">
+            <form string="Base Project">
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="number"/>
+                            <field name="location"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Sub Projects" name="sub_projects">
+                            <field name="project_ids" readonly="1">
+                                <list>
+                                    <field name="name" string="Project Name"/>
+                                    <field name="user_id" string="Project Manager"/>
+                                    <field name="stage_id" string="Stage"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ── Window action ──────────────────────────────────────────────────── -->
+    <record id="action_ida_base_project" model="ir.actions.act_window">
+        <field name="name">Base Projects</field>
+        <field name="res_model">ida.base.project</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <!-- ── Menu: Project > Configuration > Base Projects ─────────────────── -->
+    <menuitem
+        id="menu_ida_base_project"
+        name="Base Projects"
+        parent="project.menu_project_config"
+        action="action_ida_base_project"
+        groups="project.group_project_manager"
+        sequence="10"/>
+
+</odoo>
